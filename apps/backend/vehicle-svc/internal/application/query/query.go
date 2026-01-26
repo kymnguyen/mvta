@@ -17,28 +17,3 @@ type QueryBus interface {
 
 	Register(queryName string, handler QueryHandler)
 }
-
-type GetVehicleQuery struct {
-	VehicleID string
-}
-
-func (q *GetVehicleQuery) QueryName() string {
-	return "GetVehicle"
-}
-
-type GetAllVehiclesQuery struct {
-	Limit  int
-	Offset int
-}
-
-func (q *GetAllVehiclesQuery) QueryName() string {
-	return "GetAllVehicles"
-}
-
-type GetVehicleByVINQuery struct {
-	VIN string
-}
-
-func (q *GetVehicleByVINQuery) QueryName() string {
-	return "GetVehicleByVIN"
-}

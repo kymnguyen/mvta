@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/handler"
+	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/handler/vehicle"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/command"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/query"
 )
@@ -16,7 +16,7 @@ func RegisterRoutes(
 	queryBus query.QueryBus,
 	logger *zap.Logger,
 ) {
-	h := handler.NewVehicleHandler(commandBus, queryBus, logger)
+	h := vehicle.InitVehicleHandler(commandBus, queryBus, logger)
 
 	mux.HandleFunc("GET /health", healthCheck)
 

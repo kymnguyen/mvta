@@ -17,7 +17,7 @@ type VehicleCreatedEvent struct {
 
 func NewVehicleCreatedEvent(vehicleID, vin, vehicleName, vehicleModel, licenseNumber, status string, latitude, longitude float64, mileage, fuelLevel float64, timestamp int64) *VehicleCreatedEvent {
 	return &VehicleCreatedEvent{
-		BaseDomainEvent: NewBaseDomainEvent("vehicle.created", vehicleID),
+		BaseDomainEvent: InitBaseDomainEvent("vehicle.created", vehicleID),
 		VehicleID:       vehicleID,
 		VIN:             vin,
 		VehicleName:     vehicleName,

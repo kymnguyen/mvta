@@ -11,7 +11,7 @@ type VehicleStatusChangedEvent struct {
 
 func NewVehicleStatusChangedEvent(vehicleID, oldStatus, newStatus string, changedAt, version int64) *VehicleStatusChangedEvent {
 	return &VehicleStatusChangedEvent{
-		BaseDomainEvent: NewBaseDomainEvent("vehicle.status.changed", vehicleID),
+		BaseDomainEvent: InitBaseDomainEvent("vehicle.status.changed", vehicleID),
 		VehicleID:       vehicleID,
 		OldStatus:       oldStatus,
 		NewStatus:       newStatus,

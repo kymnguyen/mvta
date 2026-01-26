@@ -11,7 +11,7 @@ type VehicleFuelLevelUpdatedEvent struct {
 
 func NewVehicleFuelLevelUpdatedEvent(vehicleID string, fuelLevel float64, isLow bool, updatedAt, version int64) *VehicleFuelLevelUpdatedEvent {
 	return &VehicleFuelLevelUpdatedEvent{
-		BaseDomainEvent: NewBaseDomainEvent("vehicle.fuel.updated", vehicleID),
+		BaseDomainEvent: InitBaseDomainEvent("vehicle.fuel.updated", vehicleID),
 		VehicleID:       vehicleID,
 		FuelLevel:       fuelLevel,
 		IsLow:           isLow,

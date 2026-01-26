@@ -13,7 +13,7 @@ type VehicleLocationUpdatedEvent struct {
 
 func NewVehicleLocationUpdatedEvent(vehicleID string, latitude, longitude, altitude float64, timestamp, updatedAt, version int64) *VehicleLocationUpdatedEvent {
 	return &VehicleLocationUpdatedEvent{
-		BaseDomainEvent: NewBaseDomainEvent("vehicle.location.updated", vehicleID),
+		BaseDomainEvent: InitBaseDomainEvent("vehicle.location.updated", vehicleID),
 		VehicleID:       vehicleID,
 		Latitude:        latitude,
 		Longitude:       longitude,

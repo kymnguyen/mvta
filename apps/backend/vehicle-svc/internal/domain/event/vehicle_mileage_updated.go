@@ -10,7 +10,7 @@ type VehicleMileageUpdatedEvent struct {
 
 func NewVehicleMileageUpdatedEvent(vehicleID string, mileage float64, updatedAt, version int64) *VehicleMileageUpdatedEvent {
 	return &VehicleMileageUpdatedEvent{
-		BaseDomainEvent: NewBaseDomainEvent("vehicle.mileage.updated", vehicleID),
+		BaseDomainEvent: InitBaseDomainEvent("vehicle.mileage.updated", vehicleID),
 		VehicleID:       vehicleID,
 		Mileage:         mileage,
 		UpdatedAt:       updatedAt,

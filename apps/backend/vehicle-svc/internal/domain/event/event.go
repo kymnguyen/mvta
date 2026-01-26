@@ -14,7 +14,7 @@ type BaseDomainEvent struct {
 	aggregateID string
 }
 
-func NewBaseDomainEvent(eventName, aggregateID string) BaseDomainEvent {
+func InitBaseDomainEvent(eventName, aggregateID string) BaseDomainEvent {
 	return BaseDomainEvent{
 		eventName:   eventName,
 		timestamp:   time.Now().UTC(),

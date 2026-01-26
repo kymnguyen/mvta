@@ -10,13 +10,11 @@ import (
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/valueobject"
 )
 
-// CreateVehicleCommandHandler handles vehicle creation commands.
 type CreateVehicleCommandHandler struct {
 	vehicleRepo repository.VehicleRepository
 	outboxRepo  repository.OutboxRepository
 }
 
-// NewCreateVehicleCommandHandler creates a new command handler.
 func NewCreateVehicleCommandHandler(
 	vehicleRepo repository.VehicleRepository,
 	outboxRepo repository.OutboxRepository,
@@ -27,7 +25,6 @@ func NewCreateVehicleCommandHandler(
 	}
 }
 
-// Handle processes the create vehicle command.
 func (h *CreateVehicleCommandHandler) Handle(ctx context.Context, cmd command.Command) error {
 	createCmd, ok := cmd.(*command.CreateVehicleCommand)
 	if !ok {
@@ -65,7 +62,6 @@ func (h *CreateVehicleCommandHandler) Handle(ctx context.Context, cmd command.Co
 		return fmt.Errorf("invalid fuel level: %w", err)
 	}
 
-	// Check if VIN already exists
 	exists, err := h.vehicleRepo.ExistsByVIN(ctx, createCmd.VIN)
 	if err != nil {
 		return fmt.Errorf("failed to check vin existence: %w", err)
@@ -74,7 +70,6 @@ func (h *CreateVehicleCommandHandler) Handle(ctx context.Context, cmd command.Co
 		return fmt.Errorf("vehicle with vin %s already exists", createCmd.VIN)
 	}
 
-	// Create new vehicle aggregate
 	vehicleID := valueobject.GenerateVehicleID()
 	vehicle, err := entity.NewVehicle(
 		vehicleID,
@@ -91,12 +86,10 @@ func (h *CreateVehicleCommandHandler) Handle(ctx context.Context, cmd command.Co
 		return fmt.Errorf("failed to create vehicle: %w", err)
 	}
 
-	// Save vehicle and publish events via outbox pattern
 	if err := h.vehicleRepo.Save(ctx, vehicle); err != nil {
 		return fmt.Errorf("failed to save vehicle: %w", err)
 	}
 
-	// Publish uncommitted domain events to outbox for asynchronous processing
 	for _, event := range vehicle.UncommittedEvents() {
 		if err := h.outboxRepo.SaveOutboxEvent(ctx, vehicleID.String(), event); err != nil {
 			return fmt.Errorf("failed to save outbox event: %w", err)
@@ -106,13 +99,11 @@ func (h *CreateVehicleCommandHandler) Handle(ctx context.Context, cmd command.Co
 	return nil
 }
 
-// UpdateVehicleLocationCommandHandler handles vehicle location update commands.
 type UpdateVehicleLocationCommandHandler struct {
 	vehicleRepo repository.VehicleRepository
 	outboxRepo  repository.OutboxRepository
 }
 
-// NewUpdateVehicleLocationCommandHandler creates a new command handler.
 func NewUpdateVehicleLocationCommandHandler(
 	vehicleRepo repository.VehicleRepository,
 	outboxRepo repository.OutboxRepository,
@@ -123,26 +114,22 @@ func NewUpdateVehicleLocationCommandHandler(
 	}
 }
 
-// Handle processes the update location command.
 func (h *UpdateVehicleLocationCommandHandler) Handle(ctx context.Context, cmd command.Command) error {
 	updateCmd, ok := cmd.(*command.UpdateVehicleLocationCommand)
 	if !ok {
 		return fmt.Errorf("invalid command type for UpdateVehicleLocationCommandHandler")
 	}
 
-	// Parse vehicle ID
 	vehicleID, err := valueobject.NewVehicleID(updateCmd.VehicleID)
 	if err != nil {
 		return fmt.Errorf("invalid vehicle id: %w", err)
 	}
 
-	// Retrieve existing vehicle
 	vehicle, err := h.vehicleRepo.FindByID(ctx, vehicleID)
 	if err != nil {
 		return fmt.Errorf("failed to find vehicle: %w", err)
 	}
 
-	// Create new location
 	location, err := valueobject.NewLocation(
 		updateCmd.Latitude,
 		updateCmd.Longitude,
@@ -153,17 +140,14 @@ func (h *UpdateVehicleLocationCommandHandler) Handle(ctx context.Context, cmd co
 		return fmt.Errorf("invalid location: %w", err)
 	}
 
-	// Update location on aggregate
 	if err := vehicle.UpdateLocation(location); err != nil {
 		return fmt.Errorf("failed to update location: %w", err)
 	}
 
-	// Save updated vehicle
 	if err := h.vehicleRepo.Save(ctx, vehicle); err != nil {
 		return fmt.Errorf("failed to save vehicle: %w", err)
 	}
 
-	// Publish events via outbox
 	for _, event := range vehicle.UncommittedEvents() {
 		if err := h.outboxRepo.SaveOutboxEvent(ctx, vehicleID.String(), event); err != nil {
 			return fmt.Errorf("failed to save outbox event: %w", err)
@@ -173,13 +157,11 @@ func (h *UpdateVehicleLocationCommandHandler) Handle(ctx context.Context, cmd co
 	return nil
 }
 
-// UpdateVehicleMileageCommandHandler handles vehicle mileage update commands.
 type UpdateVehicleMileageCommandHandler struct {
 	vehicleRepo repository.VehicleRepository
 	outboxRepo  repository.OutboxRepository
 }
 
-// NewUpdateVehicleMileageCommandHandler creates a new command handler.
 func NewUpdateVehicleMileageCommandHandler(
 	vehicleRepo repository.VehicleRepository,
 	outboxRepo repository.OutboxRepository,
@@ -190,42 +172,35 @@ func NewUpdateVehicleMileageCommandHandler(
 	}
 }
 
-// Handle processes the update mileage command.
 func (h *UpdateVehicleMileageCommandHandler) Handle(ctx context.Context, cmd command.Command) error {
 	mileageCmd, ok := cmd.(*command.UpdateVehicleMileageCommand)
 	if !ok {
 		return fmt.Errorf("invalid command type for UpdateVehicleMileageCommandHandler")
 	}
 
-	// Parse vehicle ID
 	vehicleID, err := valueobject.NewVehicleID(mileageCmd.VehicleID)
 	if err != nil {
 		return fmt.Errorf("invalid vehicle id: %w", err)
 	}
 
-	// Create new mileage
 	newMileage, err := valueobject.NewMileage(mileageCmd.Mileage)
 	if err != nil {
 		return fmt.Errorf("invalid mileage: %w", err)
 	}
 
-	// Retrieve existing vehicle
 	vehicle, err := h.vehicleRepo.FindByID(ctx, vehicleID)
 	if err != nil {
 		return fmt.Errorf("failed to find vehicle: %w", err)
 	}
 
-	// Update mileage on aggregate
 	if err := vehicle.UpdateMileage(newMileage); err != nil {
 		return fmt.Errorf("failed to update mileage: %w", err)
 	}
 
-	// Save updated vehicle
 	if err := h.vehicleRepo.Save(ctx, vehicle); err != nil {
 		return fmt.Errorf("failed to save vehicle: %w", err)
 	}
 
-	// Publish events via outbox
 	for _, event := range vehicle.UncommittedEvents() {
 		if err := h.outboxRepo.SaveOutboxEvent(ctx, vehicleID.String(), event); err != nil {
 			return fmt.Errorf("failed to save outbox event: %w", err)
@@ -235,13 +210,11 @@ func (h *UpdateVehicleMileageCommandHandler) Handle(ctx context.Context, cmd com
 	return nil
 }
 
-// UpdateVehicleFuelLevelCommandHandler handles vehicle fuel level update commands.
 type UpdateVehicleFuelLevelCommandHandler struct {
 	vehicleRepo repository.VehicleRepository
 	outboxRepo  repository.OutboxRepository
 }
 
-// NewUpdateVehicleFuelLevelCommandHandler creates a new command handler.
 func NewUpdateVehicleFuelLevelCommandHandler(
 	vehicleRepo repository.VehicleRepository,
 	outboxRepo repository.OutboxRepository,
@@ -252,42 +225,35 @@ func NewUpdateVehicleFuelLevelCommandHandler(
 	}
 }
 
-// Handle processes the update fuel level command.
 func (h *UpdateVehicleFuelLevelCommandHandler) Handle(ctx context.Context, cmd command.Command) error {
 	fuelCmd, ok := cmd.(*command.UpdateVehicleFuelLevelCommand)
 	if !ok {
 		return fmt.Errorf("invalid command type for UpdateVehicleFuelLevelCommandHandler")
 	}
 
-	// Parse vehicle ID
 	vehicleID, err := valueobject.NewVehicleID(fuelCmd.VehicleID)
 	if err != nil {
 		return fmt.Errorf("invalid vehicle id: %w", err)
 	}
 
-	// Create new fuel level
 	newFuelLevel, err := valueobject.NewFuelLevel(fuelCmd.FuelLevel)
 	if err != nil {
 		return fmt.Errorf("invalid fuel level: %w", err)
 	}
 
-	// Retrieve existing vehicle
 	vehicle, err := h.vehicleRepo.FindByID(ctx, vehicleID)
 	if err != nil {
 		return fmt.Errorf("failed to find vehicle: %w", err)
 	}
 
-	// Update fuel level on aggregate
 	if err := vehicle.UpdateFuelLevel(newFuelLevel); err != nil {
 		return fmt.Errorf("failed to update fuel level: %w", err)
 	}
 
-	// Save updated vehicle
 	if err := h.vehicleRepo.Save(ctx, vehicle); err != nil {
 		return fmt.Errorf("failed to save vehicle: %w", err)
 	}
 
-	// Publish events via outbox
 	for _, event := range vehicle.UncommittedEvents() {
 		if err := h.outboxRepo.SaveOutboxEvent(ctx, vehicleID.String(), event); err != nil {
 			return fmt.Errorf("failed to save outbox event: %w", err)
@@ -297,13 +263,11 @@ func (h *UpdateVehicleFuelLevelCommandHandler) Handle(ctx context.Context, cmd c
 	return nil
 }
 
-// ChangeVehicleStatusCommandHandler handles vehicle status change commands.
 type ChangeVehicleStatusCommandHandler struct {
 	vehicleRepo repository.VehicleRepository
 	outboxRepo  repository.OutboxRepository
 }
 
-// NewChangeVehicleStatusCommandHandler creates a new command handler.
 func NewChangeVehicleStatusCommandHandler(
 	vehicleRepo repository.VehicleRepository,
 	outboxRepo repository.OutboxRepository,
@@ -314,42 +278,35 @@ func NewChangeVehicleStatusCommandHandler(
 	}
 }
 
-// Handle processes the change status command.
 func (h *ChangeVehicleStatusCommandHandler) Handle(ctx context.Context, cmd command.Command) error {
 	statusCmd, ok := cmd.(*command.ChangeVehicleStatusCommand)
 	if !ok {
 		return fmt.Errorf("invalid command type for ChangeVehicleStatusCommandHandler")
 	}
 
-	// Parse vehicle ID
 	vehicleID, err := valueobject.NewVehicleID(statusCmd.VehicleID)
 	if err != nil {
 		return fmt.Errorf("invalid vehicle id: %w", err)
 	}
 
-	// Validate new status
 	newStatus, err := valueobject.NewVehicleStatus(statusCmd.NewStatus)
 	if err != nil {
 		return fmt.Errorf("invalid status: %w", err)
 	}
 
-	// Retrieve existing vehicle
 	vehicle, err := h.vehicleRepo.FindByID(ctx, vehicleID)
 	if err != nil {
 		return fmt.Errorf("failed to find vehicle: %w", err)
 	}
 
-	// Change status on aggregate
 	if err := vehicle.ChangeStatus(newStatus); err != nil {
 		return fmt.Errorf("failed to change status: %w", err)
 	}
 
-	// Save updated vehicle
 	if err := h.vehicleRepo.Save(ctx, vehicle); err != nil {
 		return fmt.Errorf("failed to save vehicle: %w", err)
 	}
 
-	// Publish events via outbox
 	for _, event := range vehicle.UncommittedEvents() {
 		if err := h.outboxRepo.SaveOutboxEvent(ctx, vehicleID.String(), event); err != nil {
 			return fmt.Errorf("failed to save outbox event: %w", err)

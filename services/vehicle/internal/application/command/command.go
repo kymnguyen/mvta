@@ -31,8 +31,8 @@ type CreateVehicleCommand struct {
 	Latitude      float64
 	Longitude     float64
 	Altitude      float64
-	Mileage       int64
-	FuelLevel     int
+	Mileage       float64
+	FuelLevel     float64
 }
 
 // CommandName returns the command name.
@@ -68,7 +68,7 @@ func (c *ChangeVehicleStatusCommand) CommandName() string {
 // UpdateVehicleMileageCommand represents the command to update vehicle mileage.
 type UpdateVehicleMileageCommand struct {
 	VehicleID string
-	Mileage   int64
+	Mileage   float64
 }
 
 // CommandName returns the command name.
@@ -79,7 +79,7 @@ func (c *UpdateVehicleMileageCommand) CommandName() string {
 // UpdateVehicleFuelLevelCommand represents the command to update vehicle fuel level.
 type UpdateVehicleFuelLevelCommand struct {
 	VehicleID string
-	FuelLevel int
+	FuelLevel float64
 }
 
 // CommandName returns the command name.

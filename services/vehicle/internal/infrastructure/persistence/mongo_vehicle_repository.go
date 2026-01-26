@@ -34,8 +34,8 @@ type vehicleDocument struct {
 	Latitude      float64 `bson:"latitude"`
 	Longitude     float64 `bson:"longitude"`
 	Altitude      float64 `bson:"altitude"`
-	Mileage       int64   `bson:"mileage"`
-	FuelLevel     int     `bson:"fuelLevel"`
+	Mileage       float64 `bson:"mileage"`
+	FuelLevel     float64 `bson:"fuelLevel"`
 	Version       int64   `bson:"version"`
 	CreatedAt     int64   `bson:"createdAt"`
 	UpdatedAt     int64   `bson:"updatedAt"`

@@ -14,24 +14,21 @@ import (
 	"github.com/kymnguyen/mvta/services/vehicle/internal/domain/repository"
 )
 
-// MongoOutboxRepository implements OutboxRepository using MongoDB with the Outbox Pattern.
 type MongoOutboxRepository struct {
 	collection *mongo.Collection
 }
 
-// NewMongoOutboxRepository creates a new MongoDB outbox repository.
 func NewMongoOutboxRepository(collection *mongo.Collection) *MongoOutboxRepository {
 	return &MongoOutboxRepository{collection: collection}
 }
 
-// outboxDocument represents an event in the outbox collection.
 type outboxDocument struct {
-	ID          string    `bson:"_id"`
-	AggregateID string    `bson:"aggregateId"`
-	EventType   string    `bson:"eventType"`
-	EventData   string    `bson:"eventData"`
-	CreatedAt   int64     `bson:"createdAt"`
-	PublishedAt *int64    `bson:"publishedAt,omitempty"`
+	ID          string `bson:"_id"`
+	AggregateID string `bson:"aggregateId"`
+	EventType   string `bson:"eventType"`
+	EventData   string `bson:"eventData"`
+	CreatedAt   int64  `bson:"createdAt"`
+	PublishedAt *int64 `bson:"publishedAt,omitempty"`
 }
 
 // SaveOutboxEvent saves a domain event to the outbox for asynchronous publication.
@@ -57,7 +54,6 @@ func (r *MongoOutboxRepository) SaveOutboxEvent(ctx context.Context, aggregateID
 	return nil
 }
 
-// GetPendingEvents retrieves unpublished events from the outbox.
 func (r *MongoOutboxRepository) GetPendingEvents(ctx context.Context, limit int) ([]repository.OutboxEvent, error) {
 	filter := bson.M{"publishedAt": nil}
 	opts := options.Find().SetLimit(int64(limit))
@@ -88,7 +84,6 @@ func (r *MongoOutboxRepository) GetPendingEvents(ctx context.Context, limit int)
 	return events, nil
 }
 
-// MarkEventAsPublished marks an outbox event as successfully published.
 func (r *MongoOutboxRepository) MarkEventAsPublished(ctx context.Context, eventID string) error {
 	now := time.Now().UTC().Unix()
 	filter := bson.M{"_id": eventID}

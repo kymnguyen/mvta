@@ -11,7 +11,6 @@ import (
 	"github.com/kymnguyen/mvta/services/vehicle/internal/domain/repository"
 )
 
-// OutboxWorker asynchronously publishes domain events from the outbox.
 type OutboxWorker struct {
 	outboxRepo     repository.OutboxRepository
 	eventPublisher EventPublisher
@@ -21,13 +20,10 @@ type OutboxWorker struct {
 	done           chan struct{}
 }
 
-// EventPublisher publishes domain events to external systems.
 type EventPublisher interface {
-	// Publish publishes an event to a topic.
 	Publish(ctx context.Context, topic string, event interface{}) error
 }
 
-// NewOutboxWorker creates a new outbox worker for event publishing.
 func NewOutboxWorker(
 	outboxRepo repository.OutboxRepository,
 	eventPublisher EventPublisher,
@@ -45,12 +41,10 @@ func NewOutboxWorker(
 	}
 }
 
-// Start begins the outbox worker polling loop.
 func (w *OutboxWorker) Start(ctx context.Context) {
 	go w.pollLoop(ctx)
 }
 
-// Stop gracefully stops the outbox worker.
 func (w *OutboxWorker) Stop() {
 	close(w.done)
 }
@@ -111,10 +105,8 @@ func (w *OutboxWorker) publishEvent(ctx context.Context, event repository.Outbox
 		return fmt.Errorf("failed to unmarshal event data: %w", err)
 	}
 
-	// Determine topic from event type
 	topic := w.determineTopicFromEventType(event.EventType)
 
-	// Publish event to topic
 	if err := w.eventPublisher.Publish(ctx, topic, data); err != nil {
 		return fmt.Errorf("failed to publish event to topic %s: %w", topic, err)
 	}
@@ -123,7 +115,6 @@ func (w *OutboxWorker) publishEvent(ctx context.Context, event repository.Outbox
 }
 
 func (w *OutboxWorker) determineTopicFromEventType(eventType string) string {
-	// Map event types to topics for multi-service communication
 	topicMap := map[string]string{
 		"*event.VehicleCreatedEvent":          "vehicle.created",
 		"*event.VehicleLocationUpdatedEvent":  "vehicle.location.updated",

@@ -51,13 +51,13 @@ type VehicleCreatedEvent struct {
 	Status        string  `json:"status"`
 	Latitude      float64 `json:"latitude"`
 	Longitude     float64 `json:"longitude"`
-	Mileage       int64   `json:"mileage"`
-	FuelLevel     int     `json:"fuelLevel"`
+	Mileage       float64 `json:"mileage"`
+	FuelLevel     float64 `json:"fuelLevel"`
 	Timestamp     int64   `json:"timestamp"`
 }
 
 // NewVehicleCreatedEvent creates a new VehicleCreatedEvent.
-func NewVehicleCreatedEvent(vehicleID, vin, vehicleName, vehicleModel, licenseNumber, status string, latitude, longitude float64, mileage int64, fuelLevel int, timestamp int64) *VehicleCreatedEvent {
+func NewVehicleCreatedEvent(vehicleID, vin, vehicleName, vehicleModel, licenseNumber, status string, latitude, longitude float64, mileage, fuelLevel float64, timestamp int64) *VehicleCreatedEvent {
 	return &VehicleCreatedEvent{
 		BaseDomainEvent: NewBaseDomainEvent("vehicle.created", vehicleID),
 		VehicleID:       vehicleID,
@@ -125,14 +125,14 @@ func NewVehicleStatusChangedEvent(vehicleID, oldStatus, newStatus string, change
 // VehicleMileageUpdatedEvent is published when vehicle mileage is updated.
 type VehicleMileageUpdatedEvent struct {
 	BaseDomainEvent
-	VehicleID string `json:"vehicleId"`
-	Mileage   int64  `json:"mileage"`
-	UpdatedAt int64  `json:"updatedAt"`
-	Version   int64  `json:"version"`
+	VehicleID string  `json:"vehicleId"`
+	Mileage   float64 `json:"mileage"`
+	UpdatedAt int64   `json:"updatedAt"`
+	Version   int64   `json:"version"`
 }
 
 // NewVehicleMileageUpdatedEvent creates a new VehicleMileageUpdatedEvent.
-func NewVehicleMileageUpdatedEvent(vehicleID string, mileage, updatedAt, version int64) *VehicleMileageUpdatedEvent {
+func NewVehicleMileageUpdatedEvent(vehicleID string, mileage float64, updatedAt, version int64) *VehicleMileageUpdatedEvent {
 	return &VehicleMileageUpdatedEvent{
 		BaseDomainEvent: NewBaseDomainEvent("vehicle.mileage.updated", vehicleID),
 		VehicleID:       vehicleID,
@@ -145,15 +145,15 @@ func NewVehicleMileageUpdatedEvent(vehicleID string, mileage, updatedAt, version
 // VehicleFuelLevelUpdatedEvent is published when vehicle fuel level is updated.
 type VehicleFuelLevelUpdatedEvent struct {
 	BaseDomainEvent
-	VehicleID string `json:"vehicleId"`
-	FuelLevel int    `json:"fuelLevel"`
-	IsLow     bool   `json:"isLow"`
-	UpdatedAt int64  `json:"updatedAt"`
-	Version   int64  `json:"version"`
+	VehicleID string  `json:"vehicleId"`
+	FuelLevel float64 `json:"fuelLevel"`
+	IsLow     bool    `json:"isLow"`
+	UpdatedAt int64   `json:"updatedAt"`
+	Version   int64   `json:"version"`
 }
 
 // NewVehicleFuelLevelUpdatedEvent creates a new VehicleFuelLevelUpdatedEvent.
-func NewVehicleFuelLevelUpdatedEvent(vehicleID string, fuelLevel int, isLow bool, updatedAt, version int64) *VehicleFuelLevelUpdatedEvent {
+func NewVehicleFuelLevelUpdatedEvent(vehicleID string, fuelLevel float64, isLow bool, updatedAt, version int64) *VehicleFuelLevelUpdatedEvent {
 	return &VehicleFuelLevelUpdatedEvent{
 		BaseDomainEvent: NewBaseDomainEvent("vehicle.fuel.updated", vehicleID),
 		VehicleID:       vehicleID,

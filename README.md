@@ -5,3 +5,6 @@
 ```sh
 go work init
 ```
+```sh
+go mod download
+```

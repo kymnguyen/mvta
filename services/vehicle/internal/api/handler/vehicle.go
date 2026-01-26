@@ -10,14 +10,12 @@ import (
 	"github.com/kymnguyen/mvta/services/vehicle/internal/application/query"
 )
 
-// VehicleHandler handles HTTP requests for vehicle operations.
 type VehicleHandler struct {
 	commandBus command.CommandBus
 	queryBus   query.QueryBus
 	logger     *zap.Logger
 }
 
-// NewVehicleHandler creates a new vehicle HTTP handler.
 func NewVehicleHandler(
 	commandBus command.CommandBus,
 	queryBus query.QueryBus,
@@ -30,7 +28,6 @@ func NewVehicleHandler(
 	}
 }
 
-// CreateVehicle handles POST /vehicles - creates a new vehicle.
 func (h *VehicleHandler) CreateVehicle(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -66,7 +63,6 @@ func (h *VehicleHandler) CreateVehicle(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// GetVehicle handles GET /vehicles/{id} - retrieves a vehicle by ID.
 func (h *VehicleHandler) GetVehicle(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	vehicleID := r.PathValue("id")
@@ -90,7 +86,6 @@ func (h *VehicleHandler) GetVehicle(w http.ResponseWriter, r *http.Request) {
 	respondSuccess(w, http.StatusOK, result)
 }
 
-// GetAllVehicles handles GET /vehicles - retrieves all vehicles with pagination.
 func (h *VehicleHandler) GetAllVehicles(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -169,7 +164,6 @@ func (h *VehicleHandler) UpdateLocation(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
-// ChangeStatus handles PATCH /vehicles/{id}/status - changes vehicle status.
 func (h *VehicleHandler) ChangeStatus(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	vehicleID := r.PathValue("id")
@@ -205,7 +199,6 @@ func (h *VehicleHandler) ChangeStatus(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// UpdateMileage handles PATCH /vehicles/{id}/mileage - updates vehicle mileage.
 func (h *VehicleHandler) UpdateMileage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	vehicleID := r.PathValue("id")
@@ -235,13 +228,12 @@ func (h *VehicleHandler) UpdateMileage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.logger.Info("vehicle mileage updated", zap.String("vehicleId", vehicleID), zap.Int64("mileage", req.Mileage))
+	h.logger.Info("vehicle mileage updated", zap.String("vehicleId", vehicleID), zap.Float64("mileage", req.Mileage))
 	respondSuccess(w, http.StatusOK, map[string]string{
 		"message": "mileage updated successfully",
 	})
 }
 
-// UpdateFuelLevel handles PATCH /vehicles/{id}/fuel - updates vehicle fuel level.
 func (h *VehicleHandler) UpdateFuelLevel(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	vehicleID := r.PathValue("id")
@@ -271,7 +263,7 @@ func (h *VehicleHandler) UpdateFuelLevel(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	h.logger.Info("vehicle fuel level updated", zap.String("vehicleId", vehicleID), zap.Int("fuelLevel", req.FuelLevel))
+	h.logger.Info("vehicle fuel level updated", zap.String("vehicleId", vehicleID), zap.Float64("fuelLevel", req.FuelLevel))
 	respondSuccess(w, http.StatusOK, map[string]string{
 		"message": "fuel level updated successfully",
 	})

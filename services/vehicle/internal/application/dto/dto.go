@@ -12,8 +12,8 @@ type CreateVehicleRequest struct {
 	Latitude      float64 `json:"latitude" binding:"required"`
 	Longitude     float64 `json:"longitude" binding:"required"`
 	Altitude      float64 `json:"altitude"`
-	Mileage       int64   `json:"mileage"`
-	FuelLevel     int     `json:"fuelLevel"`
+	Mileage       float64 `json:"mileage"`
+	FuelLevel     float64 `json:"fuelLevel"`
 }
 
 // CreateVehicleResponse is the response DTO after vehicle creation.
@@ -27,8 +27,8 @@ type CreateVehicleResponse struct {
 	Latitude      float64   `json:"latitude"`
 	Longitude     float64   `json:"longitude"`
 	Altitude      float64   `json:"altitude"`
-	Mileage       int64     `json:"mileage"`
-	FuelLevel     int       `json:"fuelLevel"`
+	Mileage       float64   `json:"mileage"`
+	FuelLevel     float64   `json:"fuelLevel"`
 	CreatedAt     time.Time `json:"createdAt"`
 }
 
@@ -75,8 +75,8 @@ type VehicleResponse struct {
 	Latitude      float64   `json:"latitude"`
 	Longitude     float64   `json:"longitude"`
 	Altitude      float64   `json:"altitude"`
-	Mileage       int64     `json:"mileage"`
-	FuelLevel     int       `json:"fuelLevel"`
+	Mileage       float64   `json:"mileage"`
+	FuelLevel     float64   `json:"fuelLevel"`
 	Version       int64     `json:"version"`
 	CreatedAt     time.Time `json:"createdAt"`
 	UpdatedAt     time.Time `json:"updatedAt"`
@@ -84,26 +84,26 @@ type VehicleResponse struct {
 
 // UpdateVehicleMileageRequest is the DTO for updating vehicle mileage.
 type UpdateVehicleMileageRequest struct {
-	Mileage int64 `json:"mileage" binding:"required"`
+	Mileage float64 `json:"mileage" binding:"required"`
 }
 
 // UpdateVehicleMileageResponse is the response DTO after mileage update.
 type UpdateVehicleMileageResponse struct {
 	ID        string    `json:"id"`
-	Mileage   int64     `json:"mileage"`
+	Mileage   float64   `json:"mileage"`
 	Version   int64     `json:"version"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 // UpdateVehicleFuelLevelRequest is the DTO for updating vehicle fuel level.
 type UpdateVehicleFuelLevelRequest struct {
-	FuelLevel int `json:"fuelLevel" binding:"required"`
+	FuelLevel float64 `json:"fuelLevel" binding:"required"`
 }
 
 // UpdateVehicleFuelLevelResponse is the response DTO after fuel level update.
 type UpdateVehicleFuelLevelResponse struct {
 	ID        string    `json:"id"`
-	FuelLevel int       `json:"fuelLevel"`
+	FuelLevel float64   `json:"fuelLevel"`
 	IsLow     bool      `json:"isLow"`
 	Version   int64     `json:"version"`
 	UpdatedAt time.Time `json:"updatedAt"`

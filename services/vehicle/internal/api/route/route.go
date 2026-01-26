@@ -10,7 +10,6 @@ import (
 	"github.com/kymnguyen/mvta/services/vehicle/internal/application/query"
 )
 
-// RegisterRoutes registers all API routes.
 func RegisterRoutes(
 	mux *http.ServeMux,
 	commandBus command.CommandBus,
@@ -19,10 +18,8 @@ func RegisterRoutes(
 ) {
 	h := handler.NewVehicleHandler(commandBus, queryBus, logger)
 
-	// Health check
 	mux.HandleFunc("GET /health", healthCheck)
 
-	// Vehicle endpoints
 	mux.HandleFunc("POST /api/v1/vehicles", h.CreateVehicle)
 	mux.HandleFunc("GET /api/v1/vehicles", h.GetAllVehicles)
 	mux.HandleFunc("GET /api/v1/vehicles/{id}", h.GetVehicle)
@@ -32,7 +29,6 @@ func RegisterRoutes(
 	mux.HandleFunc("PATCH /api/v1/vehicles/{id}/fuel", h.UpdateFuelLevel)
 }
 
-// healthCheck handles GET /health - returns service health status.
 func healthCheck(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

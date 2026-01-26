@@ -2,7 +2,6 @@ package dto
 
 import "time"
 
-// CreateVehicleRequest is the DTO for creating a new vehicle.
 type CreateVehicleRequest struct {
 	VIN           string  `json:"vin" binding:"required"`
 	VehicleName   string  `json:"vehicleName" binding:"required"`
@@ -16,7 +15,6 @@ type CreateVehicleRequest struct {
 	FuelLevel     float64 `json:"fuelLevel"`
 }
 
-// CreateVehicleResponse is the response DTO after vehicle creation.
 type CreateVehicleResponse struct {
 	ID            string    `json:"id"`
 	VIN           string    `json:"vin"`
@@ -32,7 +30,6 @@ type CreateVehicleResponse struct {
 	CreatedAt     time.Time `json:"createdAt"`
 }
 
-// UpdateVehicleLocationRequest is the DTO for updating vehicle location.
 type UpdateVehicleLocationRequest struct {
 	Latitude  float64 `json:"latitude" binding:"required"`
 	Longitude float64 `json:"longitude" binding:"required"`
@@ -40,7 +37,6 @@ type UpdateVehicleLocationRequest struct {
 	Timestamp int64   `json:"timestamp" binding:"required"`
 }
 
-// UpdateVehicleLocationResponse is the response DTO after location update.
 type UpdateVehicleLocationResponse struct {
 	ID        string    `json:"id"`
 	Latitude  float64   `json:"latitude"`
@@ -50,12 +46,10 @@ type UpdateVehicleLocationResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-// ChangeVehicleStatusRequest is the DTO for changing vehicle status.
 type ChangeVehicleStatusRequest struct {
 	Status string `json:"status" binding:"required"`
 }
 
-// ChangeVehicleStatusResponse is the response DTO after status change.
 type ChangeVehicleStatusResponse struct {
 	ID        string    `json:"id"`
 	OldStatus string    `json:"oldStatus"`
@@ -64,7 +58,6 @@ type ChangeVehicleStatusResponse struct {
 	ChangedAt time.Time `json:"changedAt"`
 }
 
-// VehicleResponse is the standard vehicle data transfer object.
 type VehicleResponse struct {
 	ID            string    `json:"id"`
 	VIN           string    `json:"vin"`
@@ -82,12 +75,10 @@ type VehicleResponse struct {
 	UpdatedAt     time.Time `json:"updatedAt"`
 }
 
-// UpdateVehicleMileageRequest is the DTO for updating vehicle mileage.
 type UpdateVehicleMileageRequest struct {
 	Mileage float64 `json:"mileage" binding:"required"`
 }
 
-// UpdateVehicleMileageResponse is the response DTO after mileage update.
 type UpdateVehicleMileageResponse struct {
 	ID        string    `json:"id"`
 	Mileage   float64   `json:"mileage"`
@@ -95,12 +86,10 @@ type UpdateVehicleMileageResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-// UpdateVehicleFuelLevelRequest is the DTO for updating vehicle fuel level.
 type UpdateVehicleFuelLevelRequest struct {
 	FuelLevel float64 `json:"fuelLevel" binding:"required"`
 }
 
-// UpdateVehicleFuelLevelResponse is the response DTO after fuel level update.
 type UpdateVehicleFuelLevelResponse struct {
 	ID        string    `json:"id"`
 	FuelLevel float64   `json:"fuelLevel"`
@@ -109,7 +98,6 @@ type UpdateVehicleFuelLevelResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-// ErrorResponse is the standard error response format.
 type ErrorResponse struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`

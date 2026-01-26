@@ -13,17 +13,14 @@ import (
 	"github.com/kymnguyen/mvta/services/vehicle/internal/domain/valueobject"
 )
 
-// MongoVehicleRepository implements the VehicleRepository interface using MongoDB.
 type MongoVehicleRepository struct {
 	collection *mongo.Collection
 }
 
-// NewMongoVehicleRepository creates a new MongoDB vehicle repository.
 func NewMongoVehicleRepository(collection *mongo.Collection) *MongoVehicleRepository {
 	return &MongoVehicleRepository{collection: collection}
 }
 
-// vehicleDocument represents a vehicle document in MongoDB.
 type vehicleDocument struct {
 	ID            string  `bson:"_id"`
 	VIN           string  `bson:"vin"`
@@ -41,7 +38,6 @@ type vehicleDocument struct {
 	UpdatedAt     int64   `bson:"updatedAt"`
 }
 
-// Save persists a vehicle aggregate with optimistic concurrency control.
 func (r *MongoVehicleRepository) Save(ctx context.Context, vehicle *entity.Vehicle) error {
 	doc := vehicleDocument{
 		ID:            vehicle.ID().String(),
@@ -63,7 +59,7 @@ func (r *MongoVehicleRepository) Save(ctx context.Context, vehicle *entity.Vehic
 	opts := options.Update().SetUpsert(true)
 	filter := bson.M{
 		"_id":     vehicle.ID().String(),
-		"version": vehicle.Version().Value() - 1, // Optimistic concurrency control
+		"version": vehicle.Version().Value() - 1,
 	}
 	update := bson.M{
 		"$set": doc,
@@ -74,12 +70,10 @@ func (r *MongoVehicleRepository) Save(ctx context.Context, vehicle *entity.Vehic
 		return fmt.Errorf("failed to save vehicle: %w", err)
 	}
 
-	// If upserted, no version conflict
 	if result.UpsertedID != nil {
 		return nil
 	}
 
-	// If no document matched, version conflict occurred
 	if result.ModifiedCount == 0 && result.MatchedCount == 0 {
 		return fmt.Errorf("optimistic concurrency conflict: vehicle version mismatch")
 	}
@@ -87,7 +81,6 @@ func (r *MongoVehicleRepository) Save(ctx context.Context, vehicle *entity.Vehic
 	return nil
 }
 
-// FindByID retrieves a vehicle by its ID.
 func (r *MongoVehicleRepository) FindByID(ctx context.Context, id valueobject.VehicleID) (*entity.Vehicle, error) {
 	var doc vehicleDocument
 	err := r.collection.FindOne(ctx, bson.M{"_id": id.String()}).Decode(&doc)
@@ -123,7 +116,6 @@ func (r *MongoVehicleRepository) FindByID(ctx context.Context, id valueobject.Ve
 	return vehicle, nil
 }
 
-// FindAll retrieves all vehicles with pagination.
 func (r *MongoVehicleRepository) FindAll(ctx context.Context, limit int, offset int) ([]*entity.Vehicle, error) {
 	opts := options.Find().SetLimit(int64(limit)).SetSkip(int64(offset))
 	cursor, err := r.collection.Find(ctx, bson.M{}, opts)
@@ -171,7 +163,6 @@ func (r *MongoVehicleRepository) FindAll(ctx context.Context, limit int, offset 
 	return results, nil
 }
 
-// Delete removes a vehicle from storage.
 func (r *MongoVehicleRepository) Delete(ctx context.Context, id valueobject.VehicleID) error {
 	result, err := r.collection.DeleteOne(ctx, bson.M{"_id": id.String()})
 	if err != nil {
@@ -185,7 +176,6 @@ func (r *MongoVehicleRepository) Delete(ctx context.Context, id valueobject.Vehi
 	return nil
 }
 
-// ExistsByVIN checks if a vehicle with the given VIN exists.
 func (r *MongoVehicleRepository) ExistsByVIN(ctx context.Context, vin string) (bool, error) {
 	count, err := r.collection.CountDocuments(ctx, bson.M{"vin": vin})
 	if err != nil {

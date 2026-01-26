@@ -125,7 +125,6 @@ func (h *VehicleHandler) GetAllVehicles(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
-// UpdateLocation handles PATCH /vehicles/{id}/location - updates vehicle location.
 func (h *VehicleHandler) UpdateLocation(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	vehicleID := r.PathValue("id")

@@ -49,9 +49,9 @@ func main() {
 
 	appLogger.Info("vehicle service started", zap.String("mongoURI", mongoURI))
 
-	outboxWorker := initializeOutboxWorker(containerDI, appLogger)
+	domainEventWorker := initializeWorker(containerDI, appLogger)
 	backgroundContext, cancelBackground := context.WithCancel(context.Background())
-	outboxWorker.Start(backgroundContext)
+	domainEventWorker.Start(backgroundContext)
 
 	mux := registerApiRoutes(containerDI, appLogger)
 	httpServer := startHTTPServer(cfg, middleware.LoggingMiddleware(mux))
@@ -65,7 +65,7 @@ func main() {
 
 	handleGracefulShutdown(appLogger)
 
-	outboxWorker.Stop()
+	domainEventWorker.Stop()
 	cancelBackground()
 	cancelHttpServer := shutdownHTTPServer(httpServer, appLogger)
 	cancelHttpServer()
@@ -125,17 +125,17 @@ func handleGracefulShutdown(logger *zap.Logger) {
 	logger.Info("shutdown signal received")
 }
 
-func initializeOutboxWorker(container *di.Container, logger *zap.Logger) *worker.OutboxWorker {
+func initializeWorker(container *di.Container, logger *zap.Logger) *worker.DomainEventWorker {
 	const pollInterval = 5 * time.Second
 	const batchSize = 10
-	outboxWorker := worker.NewOutboxWorker(
+	domainEventWorker := worker.NewDomainEventWorker(
 		container.OutboxRepository,
 		&noOpEventPublisher{logger: logger},
 		logger,
 		pollInterval,
 		batchSize,
 	)
-	return outboxWorker
+	return domainEventWorker
 }
 
 func initializeDIContainer(mongoURI string, logger *zap.Logger) *di.Container {

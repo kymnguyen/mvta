@@ -1,3 +1,5 @@
+// This file was renamed from outbox_worker.go to domain_event_worker.go
+// See the original file for full implementation.
 package worker
 
 import (
@@ -9,9 +11,15 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/repository"
+	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/resilience"
 )
 
-type OutboxWorker struct {
+var (
+	outboxCircuitBreaker = resilience.NewCircuitBreaker(3, 2, 10*time.Second)
+	outboxRetryPolicy    = resilience.NewRetryPolicy(3, 100*time.Millisecond, 1*time.Second)
+)
+
+type DomainEventWorker struct {
 	outboxRepo     repository.OutboxRepository
 	eventPublisher EventPublisher
 	logger         *zap.Logger
@@ -24,14 +32,14 @@ type EventPublisher interface {
 	Publish(ctx context.Context, topic string, event interface{}) error
 }
 
-func NewOutboxWorker(
+func NewDomainEventWorker(
 	outboxRepo repository.OutboxRepository,
 	eventPublisher EventPublisher,
 	logger *zap.Logger,
 	pollInterval time.Duration,
 	batchSize int,
-) *OutboxWorker {
-	return &OutboxWorker{
+) *DomainEventWorker {
+	return &DomainEventWorker{
 		outboxRepo:     outboxRepo,
 		eventPublisher: eventPublisher,
 		logger:         logger,
@@ -41,35 +49,35 @@ func NewOutboxWorker(
 	}
 }
 
-func (w *OutboxWorker) Start(ctx context.Context) {
+func (w *DomainEventWorker) Start(ctx context.Context) {
 	go w.pollLoop(ctx)
 }
 
-func (w *OutboxWorker) Stop() {
+func (w *DomainEventWorker) Stop() {
 	close(w.done)
 }
 
-func (w *OutboxWorker) pollLoop(ctx context.Context) {
+func (w *DomainEventWorker) pollLoop(ctx context.Context) {
 	ticker := time.NewTicker(w.pollInterval)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-w.done:
-			w.logger.Info("outbox worker stopped")
+			w.logger.Info("domain event worker stopped")
 			return
 		case <-ctx.Done():
-			w.logger.Info("outbox worker context cancelled")
+			w.logger.Info("domain event worker context cancelled")
 			return
 		case <-ticker.C:
 			if err := w.processPendingEvents(ctx); err != nil {
-				w.logger.Error("failed to process outbox events", zap.Error(err))
+				w.logger.Error("failed to process domain events", zap.Error(err))
 			}
 		}
 	}
 }
 
-func (w *OutboxWorker) processPendingEvents(ctx context.Context) error {
+func (w *DomainEventWorker) processPendingEvents(ctx context.Context) error {
 	events, err := w.outboxRepo.GetPendingEvents(ctx, w.batchSize)
 	if err != nil {
 		return fmt.Errorf("failed to get pending events: %w", err)
@@ -79,7 +87,7 @@ func (w *OutboxWorker) processPendingEvents(ctx context.Context) error {
 		return nil
 	}
 
-	w.logger.Debug("processing pending outbox events", zap.Int("count", len(events)))
+	w.logger.Debug("processing pending domain events", zap.Int("count", len(events)))
 
 	for _, event := range events {
 		if err := w.publishEvent(ctx, event); err != nil {
@@ -99,7 +107,7 @@ func (w *OutboxWorker) processPendingEvents(ctx context.Context) error {
 	return nil
 }
 
-func (w *OutboxWorker) publishEvent(ctx context.Context, event repository.OutboxEvent) error {
+func (w *DomainEventWorker) publishEvent(ctx context.Context, event repository.OutboxEvent) error {
 	var data map[string]interface{}
 	if err := json.Unmarshal(event.EventData, &data); err != nil {
 		return fmt.Errorf("failed to unmarshal event data: %w", err)
@@ -107,14 +115,18 @@ func (w *OutboxWorker) publishEvent(ctx context.Context, event repository.Outbox
 
 	topic := w.determineTopicFromEventType(event.EventType)
 
-	if err := w.eventPublisher.Publish(ctx, topic, data); err != nil {
+	err := outboxCircuitBreaker.Execute(func() error {
+		return outboxRetryPolicy.Execute(ctx, func() error {
+			return w.eventPublisher.Publish(ctx, topic, data)
+		})
+	})
+	if err != nil {
 		return fmt.Errorf("failed to publish event to topic %s: %w", topic, err)
 	}
-
 	return nil
 }
 
-func (w *OutboxWorker) determineTopicFromEventType(eventType string) string {
+func (w *DomainEventWorker) determineTopicFromEventType(eventType string) string {
 	topicMap := map[string]string{
 		"*event.VehicleCreatedEvent":          "vehicle.created",
 		"*event.VehicleLocationUpdatedEvent":  "vehicle.location.updated",

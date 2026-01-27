@@ -12,6 +12,7 @@ import (
 
 	"github.com/kymnguyen/mvta/apps/backend/auth-svc/cmd/config"
 	"github.com/kymnguyen/mvta/apps/backend/auth-svc/internal/api/route"
+	"github.com/kymnguyen/mvta/apps/backend/auth-svc/internal/infrastructure/di"
 )
 
 func main() {
@@ -24,9 +25,10 @@ func main() {
 	logger.Info("Starting auth-svc...")
 
 	cfg := config.Load()
+	container := di.NewContainer(logger)
 
 	mux := http.NewServeMux()
-	route.RegisterRoutes(mux)
+	route.RegisterRoutes(mux, container.LoginHandler, container.RegisterHandler, logger)
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,
@@ -38,6 +40,8 @@ func main() {
 			logger.Fatal("ListenAndServe error", zap.Error(err))
 		}
 	}()
+
+	logger.Info("auth-svc running on port " + cfg.Port)
 
 	<-ctx.Done()
 	logger.Info("Shutting down auth-svc...")

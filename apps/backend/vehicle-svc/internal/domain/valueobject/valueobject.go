@@ -145,7 +145,8 @@ func (m Mileage) AddKilometers(km float64) (Mileage, error) {
 }
 
 func (m Mileage) Equals(other Mileage) bool {
-	return m.kilometers == other.kilometers
+	const epsilon = 0.001
+	return (m.kilometers-other.kilometers) < epsilon && (other.kilometers-m.kilometers) < epsilon
 }
 
 type FuelLevel struct {
@@ -168,7 +169,8 @@ func (f FuelLevel) IsLow() bool {
 }
 
 func (f FuelLevel) Equals(other FuelLevel) bool {
-	return f.percentage == other.percentage
+	const epsilon = 0.001
+	return (f.percentage-other.percentage) < epsilon && (other.percentage-f.percentage) < epsilon
 }
 
 type LicenseNumber struct {

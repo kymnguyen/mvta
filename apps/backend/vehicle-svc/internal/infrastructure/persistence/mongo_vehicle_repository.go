@@ -91,12 +91,30 @@ func (r *MongoVehicleRepository) FindByID(ctx context.Context, id valueobject.Ve
 		return nil, fmt.Errorf("failed to find vehicle: %w", err)
 	}
 
-	status, _ := valueobject.NewVehicleStatus(doc.Status)
-	location, _ := valueobject.NewLocation(doc.Latitude, doc.Longitude, doc.Altitude, 0)
-	licenseNumber, _ := valueobject.NewLicenseNumber(doc.LicenseNumber)
-	mileage, _ := valueobject.NewMileage(doc.Mileage)
-	fuelLevel, _ := valueobject.NewFuelLevel(doc.FuelLevel)
-	version, _ := valueobject.NewVersion(doc.Version)
+	status, err := valueobject.NewVehicleStatus(doc.Status)
+	if err != nil {
+		return nil, fmt.Errorf("invalid vehicle status from database: %w", err)
+	}
+	location, err := valueobject.NewLocation(doc.Latitude, doc.Longitude, doc.Altitude, doc.CreatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("invalid location from database: %w", err)
+	}
+	licenseNumber, err := valueobject.NewLicenseNumber(doc.LicenseNumber)
+	if err != nil {
+		return nil, fmt.Errorf("invalid license number from database: %w", err)
+	}
+	mileage, err := valueobject.NewMileage(doc.Mileage)
+	if err != nil {
+		return nil, fmt.Errorf("invalid mileage from database: %w", err)
+	}
+	fuelLevel, err := valueobject.NewFuelLevel(doc.FuelLevel)
+	if err != nil {
+		return nil, fmt.Errorf("invalid fuel level from database: %w", err)
+	}
+	version, err := valueobject.NewVersion(doc.Version)
+	if err != nil {
+		return nil, fmt.Errorf("invalid version from database: %w", err)
+	}
 
 	vehicle := entity.LoadFromHistory(
 		id,
@@ -136,12 +154,30 @@ func (r *MongoVehicleRepository) FindAll(ctx context.Context, limit int, offset 
 		bson.Unmarshal(bsonBytes, &vehDoc)
 
 		vehicleID, _ := valueobject.NewVehicleID(vehDoc.ID)
-		status, _ := valueobject.NewVehicleStatus(vehDoc.Status)
-		location, _ := valueobject.NewLocation(vehDoc.Latitude, vehDoc.Longitude, vehDoc.Altitude, 0)
-		licenseNumber, _ := valueobject.NewLicenseNumber(vehDoc.LicenseNumber)
-		mileage, _ := valueobject.NewMileage(vehDoc.Mileage)
-		fuelLevel, _ := valueobject.NewFuelLevel(vehDoc.FuelLevel)
-		version, _ := valueobject.NewVersion(vehDoc.Version)
+		status, err := valueobject.NewVehicleStatus(doc.Status)
+		if err != nil {
+			return nil, fmt.Errorf("invalid vehicle status from database: %w", err)
+		}
+		location, err := valueobject.NewLocation(doc.Latitude, doc.Longitude, doc.Altitude, doc.CreatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("invalid location from database: %w", err)
+		}
+		licenseNumber, err := valueobject.NewLicenseNumber(doc.LicenseNumber)
+		if err != nil {
+			return nil, fmt.Errorf("invalid license number from database: %w", err)
+		}
+		mileage, err := valueobject.NewMileage(doc.Mileage)
+		if err != nil {
+			return nil, fmt.Errorf("invalid mileage from database: %w", err)
+		}
+		fuelLevel, err := valueobject.NewFuelLevel(doc.FuelLevel)
+		if err != nil {
+			return nil, fmt.Errorf("invalid fuel level from database: %w", err)
+		}
+		version, err := valueobject.NewVersion(doc.Version)
+		if err != nil {
+			return nil, fmt.Errorf("invalid version from database: %w", err)
+		}
 
 		vehicle := entity.LoadFromHistory(
 			vehicleID,

@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/cmd/config"
+	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/middleware"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/route"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/di"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/worker"
@@ -23,57 +24,56 @@ type noOpEventPublisher struct {
 }
 
 func main() {
-	logger := initializeLogger()
-	defer logger.Sync()
+	appLogger := initializeLogger()
+	defer appLogger.Sync()
 
-	err := godotenv.Load()
-	if err != nil {
-		logger.Fatal("Error loading .env file")
+	appErr := godotenv.Load()
+	if appErr != nil {
+		appLogger.Fatal("Error loading .env file")
 	}
 
 	cfg := loadConfig()
 	mongoURI := cfg.Mongo.URI
 	if mongoURI == "" {
-		logger.Fatal("ENV: MONGO_URI is required")
+		appLogger.Fatal("ENV: MONGO_URI is required")
 	}
 
-	ctx, cancel, container := initializeDIContainer(mongoURI, logger)
+	containerDI := initializeDIContainer(mongoURI, appLogger)
 
 	defer func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		if err := container.Close(ctx); err != nil {
-			logger.Error("failed to close container", zap.Error(err))
+		ctx, cancelBackground := context.WithTimeout(context.Background(), 10*time.Second)
+		if err := containerDI.Close(ctx); err != nil {
+			appLogger.Error("failed to close container", zap.Error(err))
 		}
-		cancel()
+		cancelBackground()
 	}()
 
-	logger.Info("vehicle service started", zap.String("mongoURI", mongoURI))
+	appLogger.Info("vehicle service started", zap.String("mongoURI", mongoURI))
 
-	outboxWorker := initializeOutboxWorker(container, logger)
+	outboxWorker := initializeOutboxWorker(containerDI, appLogger)
 
-	backgroundContext, bgCancel := context.WithCancel(context.Background())
+	backgroundContext, cancelBackground := context.WithCancel(context.Background())
 	outboxWorker.Start(backgroundContext)
 
-	mux := registerApiRoutes(container, logger)
-
-	server := startHTTPServer(cfg, mux)
+	mux := registerApiRoutes(containerDI, appLogger)
+	httpServer := startHTTPServer(cfg, middleware.LoggingMiddleware(mux))
 
 	go func() {
-		logger.Info("starting http server", zap.String("addr", server.Addr))
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Fatal("http server error", zap.Error(err))
+		appLogger.Info("starting http server", zap.String("addr", httpServer.Addr))
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			appLogger.Fatal("http server error", zap.Error(err))
 		}
 	}()
 
-	handleGracefulShutdown(logger)
+	handleGracefulShutdown(appLogger)
 
 	outboxWorker.Stop()
-	bgCancel()
+	cancelBackground()
 
-	cancel = shutdownHTTPServer(ctx, cancel, server, logger)
-	cancel()
+	cancelHttpServer := shutdownHTTPServer(httpServer, appLogger)
+	cancelHttpServer()
 
-	logger.Info("vehicle service stopped")
+	appLogger.Info("vehicle service stopped")
 }
 
 func loadConfig() config.Config {
@@ -96,10 +96,10 @@ func loadConfig() config.Config {
 	}
 }
 
-func startHTTPServer(configuration config.Config, mux *http.ServeMux) *http.Server {
+func startHTTPServer(configuration config.Config, handler http.Handler) *http.Server {
 	server := &http.Server{
 		Addr:         configuration.HTTP.Port,
-		Handler:      mux,
+		Handler:      handler,
 		ReadTimeout:  configuration.HTTP.ReadTimeout,
 		WriteTimeout: configuration.HTTP.WriteTimeout,
 		IdleTimeout:  60 * time.Second,
@@ -113,8 +113,8 @@ func registerApiRoutes(container *di.Container, logger *zap.Logger) *http.ServeM
 	return mux
 }
 
-func shutdownHTTPServer(ctx context.Context, cancel context.CancelFunc, server *http.Server, logger *zap.Logger) context.CancelFunc {
-	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+func shutdownHTTPServer(server *http.Server, logger *zap.Logger) context.CancelFunc {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	if err := server.Shutdown(ctx); err != nil {
 		logger.Error("failed to shutdown server", zap.Error(err))
 	}
@@ -142,14 +142,14 @@ func initializeOutboxWorker(container *di.Container, logger *zap.Logger) *worker
 	return outboxWorker
 }
 
-func initializeDIContainer(mongoURI string, logger *zap.Logger) (context.Context, context.CancelFunc, *di.Container) {
+func initializeDIContainer(mongoURI string, logger *zap.Logger) *di.Container {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	container, err := di.NewContainer(ctx, mongoURI, logger)
 	cancel()
 	if err != nil {
 		logger.Fatal("failed to initialize container", zap.Error(err))
 	}
-	return ctx, cancel, container
+	return container
 }
 
 func initializeLogger() *zap.Logger {

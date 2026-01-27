@@ -124,7 +124,7 @@ func (r *MongoVehicleRepository) FindAll(ctx context.Context, limit int, offset 
 	}
 	defer cursor.Close(ctx)
 
-	var vehicles []*entity.Vehicle
+	var vehicles []vehicleDocument
 	if err = cursor.All(ctx, &vehicles); err != nil {
 		return nil, fmt.Errorf("failed to decode vehicles: %w", err)
 	}

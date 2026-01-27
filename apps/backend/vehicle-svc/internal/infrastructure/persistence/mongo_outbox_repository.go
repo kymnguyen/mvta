@@ -31,7 +31,6 @@ type outboxDocument struct {
 	PublishedAt *int64 `bson:"publishedAt,omitempty"`
 }
 
-// SaveOutboxEvent saves a domain event to the outbox for asynchronous publication.
 func (r *MongoOutboxRepository) SaveOutboxEvent(ctx context.Context, aggregateID string, event interface{}) error {
 	eventData, err := json.Marshal(event)
 	if err != nil {

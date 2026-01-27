@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: mongo
+    restart: always
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-mongo}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - qaas-workout
+  kafka:
+    image: bitnami/kafka:latest
+    networks:
+      - qaas-workout
+  vehicle-service:
+    build: ./apps/backend/vehicle-svc
+    depends_on: [mongo]
+    networks:
+      - qaas-workout
+volumes:
+  mongodb_data:
+networks:
+  qaas-workout:

@@ -18,6 +18,15 @@
       "cwd": "${workspaceFolder}/apps/backend/vehicle-svc",
       "envFile": "${workspaceFolder}/apps/backend/vehicle-svc/.env",
       "args": [ "-test.v"]
-    }
+    },
+    {
+        "name": "auth-svc",
+        "type": "go",
+        "request": "launch",
+        "mode": "debug",
+        "program": "${workspaceFolder}/apps/backend/auth-svc/cmd/main.go",
+        "cwd": "${workspaceFolder}/apps/backend/auth-svc",
+        "args": []
+    },
     ]
 }

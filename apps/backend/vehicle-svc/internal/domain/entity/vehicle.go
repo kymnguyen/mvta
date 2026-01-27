@@ -189,7 +189,7 @@ func (v *Vehicle) UpdateFuelLevel(fuelLevel valueobject.FuelLevel) error {
 
 func (v *Vehicle) ChangeStatus(newStatus valueobject.VehicleStatus) error {
 	if newStatus == v.status {
-		return nil // No change
+		return nil
 	}
 
 	oldStatus := v.status

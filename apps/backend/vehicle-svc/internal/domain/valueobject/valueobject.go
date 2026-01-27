@@ -171,12 +171,10 @@ func (f FuelLevel) Equals(other FuelLevel) bool {
 	return f.percentage == other.percentage
 }
 
-// LicenseNumber represents a vehicle license plate number.
 type LicenseNumber struct {
 	value string
 }
 
-// NewLicenseNumber creates a new LicenseNumber value object.
 func NewLicenseNumber(value string) (LicenseNumber, error) {
 	if value == "" {
 		return LicenseNumber{}, fmt.Errorf("license number cannot be empty")
@@ -187,12 +185,10 @@ func NewLicenseNumber(value string) (LicenseNumber, error) {
 	return LicenseNumber{value: value}, nil
 }
 
-// String returns the string representation.
 func (l LicenseNumber) String() string {
 	return l.value
 }
 
-// Equals compares two license numbers.
 func (l LicenseNumber) Equals(other LicenseNumber) bool {
 	return l.value == other.value
 }

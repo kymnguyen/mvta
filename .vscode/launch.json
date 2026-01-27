@@ -1,0 +1,23 @@
+{
+    "configurations": [
+    {
+        "name": "vehicle-svc",
+        "type": "go",
+        "request": "launch",
+        "mode": "debug",
+        "program": "${workspaceFolder}/apps/backend/vehicle-svc/cmd/main.go",
+        "cwd": "${workspaceFolder}/apps/backend/vehicle-svc",
+        "args": []
+    },
+    {
+      "name": "Tests (vehicle-svc)",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${workspaceFolder}/apps/backend/vehicle-svc/internal/application/service/create_vechile_handler_test.go",
+      "cwd": "${workspaceFolder}/apps/backend/vehicle-svc",
+      "envFile": "${workspaceFolder}/apps/backend/vehicle-svc/.env",
+      "args": [ "-test.v"]
+    }
+    ]
+}

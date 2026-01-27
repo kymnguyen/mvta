@@ -37,7 +37,6 @@ func main() {
 	if mongoURI == "" {
 		appLogger.Fatal("ENV: MONGO_URI is required")
 	}
-
 	containerDI := initializeDIContainer(mongoURI, appLogger)
 
 	defer func() {
@@ -51,7 +50,6 @@ func main() {
 	appLogger.Info("vehicle service started", zap.String("mongoURI", mongoURI))
 
 	outboxWorker := initializeOutboxWorker(containerDI, appLogger)
-
 	backgroundContext, cancelBackground := context.WithCancel(context.Background())
 	outboxWorker.Start(backgroundContext)
 
@@ -69,7 +67,6 @@ func main() {
 
 	outboxWorker.Stop()
 	cancelBackground()
-
 	cancelHttpServer := shutdownHTTPServer(httpServer, appLogger)
 	cancelHttpServer()
 
@@ -124,7 +121,6 @@ func shutdownHTTPServer(server *http.Server, logger *zap.Logger) context.CancelF
 func handleGracefulShutdown(logger *zap.Logger) {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-
 	<-sigChan
 	logger.Info("shutdown signal received")
 }

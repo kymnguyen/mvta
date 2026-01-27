@@ -8,3 +8,8 @@ go work init
 ```sh
 go mod download
 ```
+
+run unit test
+```sh
+go test ./... -v
+``

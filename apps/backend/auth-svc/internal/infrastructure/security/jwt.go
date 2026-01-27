@@ -10,7 +10,7 @@ import (
 
 const (
 	TokenExpiration = 24 * time.Hour
-	JWTSecret       = "your-super-secret-key-change-in-production"
+	JWTSecret       = "d9f7c3e4a2b84f5d9a1d6e3f4b7c8a0e2d9f6a1b5c4e8f3d7a0b2c6e9f4a1b2"
 )
 
 type Claims struct {

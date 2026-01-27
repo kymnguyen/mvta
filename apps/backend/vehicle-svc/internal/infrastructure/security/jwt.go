@@ -10,34 +10,13 @@ import (
 
 const (
 	TokenExpiration = 24 * time.Hour
-	JWTSecret       = "your-super-secret-key-change-in-production"
+	JWTSecret       = "d9f7c3e4a2b84f5d9a1d6e3f4b7c8a0e2d9f6a1b5c4e8f3d7a0b2c6e9f4a1b2"
 )
 
 type Claims struct {
 	UserID string `json:"user_id"`
 	Role   string `json:"role"`
 	jwt.RegisteredClaims
-}
-
-func GenerateToken(userID, role string) (string, error) {
-	claims := Claims{
-		UserID: userID,
-		Role:   role,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenExpiration)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    "mvta-auth-svc",
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(JWTSecret))
-	if err != nil {
-		return "", fmt.Errorf("failed to sign token: %w", err)
-	}
-
-	return tokenString, nil
 }
 
 func ValidateToken(tokenString string) (*Claims, error) {

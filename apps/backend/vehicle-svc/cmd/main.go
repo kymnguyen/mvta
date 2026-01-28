@@ -19,10 +19,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type noOpEventPublisher struct {
-	logger *zap.Logger
-}
-
 func main() {
 	appLogger := initializeLogger()
 	defer appLogger.Sync()
@@ -155,6 +151,10 @@ func initializeLogger() *zap.Logger {
 		os.Exit(1)
 	}
 	return logger
+}
+
+type noOpEventPublisher struct {
+	logger *zap.Logger
 }
 
 func (p *noOpEventPublisher) Publish(ctx context.Context, topic string, event interface{}) error {

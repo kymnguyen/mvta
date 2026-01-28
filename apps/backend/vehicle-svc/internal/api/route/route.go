@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/handler/vehicle"
+	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/middleware"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/command"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/query"
 )
@@ -17,6 +18,7 @@ func RegisterRoutes(
 	logger *zap.Logger,
 ) {
 	h := vehicle.InitVehicleHandler(commandBus, queryBus, logger)
+	authMiddleware := middleware.AuthMiddleware("")
 
 	mux.HandleFunc("GET /health", healthCheck)
 
@@ -27,6 +29,12 @@ func RegisterRoutes(
 	mux.HandleFunc("PATCH /api/v1/vehicles/{id}/status", h.ChangeStatus)
 	mux.HandleFunc("PATCH /api/v1/vehicles/{id}/mileage", h.UpdateMileage)
 	mux.HandleFunc("PATCH /api/v1/vehicles/{id}/fuel", h.UpdateFuelLevel)
+
+	adminMux := http.NewServeMux()
+	adminMux.HandleFunc("GET /api/v1/admin/vehicles", h.GetAllVehicles)
+	middlewareHandler := authMiddleware(adminMux)
+
+	mux.Handle("/api/v1/admin/", middlewareHandler)
 }
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {

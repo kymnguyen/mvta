@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"go.uber.org/zap"
-
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/resilience"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/security"
 )
@@ -64,7 +62,6 @@ func ResilienceMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// LoggingMiddleware logs incoming requests with IP address and response status
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ip := GetClientIP(r)
@@ -81,37 +78,6 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		log.Printf("[RESPONSE] Method=%s Path=%s IP=%s StatusCode=%d Duration=%dms",
 			r.Method, r.URL.Path, ip, wrappedWriter.statusCode, duration.Milliseconds())
 	})
-}
-
-func LoggingMiddlewareWithZap(logger *zap.Logger) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ip := GetClientIP(r)
-			startTime := time.Now()
-
-			wrappedWriter := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
-
-			logger.Info("incoming request",
-				zap.String("method", r.Method),
-				zap.String("path", r.URL.Path),
-				zap.String("ip", ip),
-				zap.String("user_agent", r.Header.Get("User-Agent")),
-				zap.String("query", r.URL.RawQuery),
-			)
-
-			next.ServeHTTP(wrappedWriter, r)
-
-			duration := time.Since(startTime)
-			logger.Info("response sent",
-				zap.String("method", r.Method),
-				zap.String("path", r.URL.Path),
-				zap.String("ip", ip),
-				zap.Int("status_code", wrappedWriter.statusCode),
-				zap.Duration("duration", duration),
-				zap.Int64("duration_ms", duration.Milliseconds()),
-			)
-		})
-	}
 }
 
 func AuthMiddleware(requiredRole string) func(http.Handler) http.Handler {

@@ -30,24 +30,6 @@ func (h *VehicleCreatedEventHandler) Handle(ctx context.Context, payload []byte)
 		zap.String("vin", evt.VIN),
 	)
 
-	cmd := &command.CreateVehicleCommand{
-		VIN:           evt.VIN,
-		VehicleName:   evt.VehicleName,
-		VehicleModel:  evt.VehicleModel,
-		LicenseNumber: evt.LicenseNumber,
-		Status:        evt.Status,
-		Latitude:      evt.Latitude,
-		Longitude:     evt.Longitude,
-		Altitude:      0,
-		Mileage:       evt.Mileage,
-		FuelLevel:     evt.FuelLevel,
-	}
-
-	if err := h.commandBus.Dispatch(ctx, cmd); err != nil {
-		h.logger.Error("failed to dispatch create vehicle command", zap.Error(err))
-		return err
-	}
-
 	changeCmd := &command.RecordVehicleChangeCommand{
 		VehicleID:  evt.VehicleID,
 		VIN:        evt.VIN,

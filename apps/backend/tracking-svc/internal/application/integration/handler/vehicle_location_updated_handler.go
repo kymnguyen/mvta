@@ -25,19 +25,6 @@ func (h *VehicleLocationUpdatedEventHandler) Handle(ctx context.Context, payload
 		return err
 	}
 
-	cmd := &command.UpdateVehicleLocationCommand{
-		VehicleID: evt.VehicleID,
-		Latitude:  evt.Latitude,
-		Longitude: evt.Longitude,
-		Altitude:  evt.Altitude,
-		Timestamp: evt.Timestamp,
-	}
-
-	if err := h.commandBus.Dispatch(ctx, cmd); err != nil {
-		h.logger.Error("failed to dispatch update vehicle location command", zap.Error(err))
-		return err
-	}
-
 	changeCmd := &command.RecordVehicleChangeCommand{
 		VehicleID:  evt.VehicleID,
 		VIN:        "",

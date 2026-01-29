@@ -25,16 +25,6 @@ func (h *VehicleStatusChangedEventHandler) Handle(ctx context.Context, payload [
 		return err
 	}
 
-	cmd := &command.ChangeVehicleStatusCommand{
-		VehicleID: evt.VehicleID,
-		NewStatus: evt.NewStatus,
-	}
-
-	if err := h.commandBus.Dispatch(ctx, cmd); err != nil {
-		h.logger.Error("failed to dispatch change vehicle status command", zap.Error(err))
-		return err
-	}
-
 	changeCmd := &command.RecordVehicleChangeCommand{
 		VehicleID:  evt.VehicleID,
 		VIN:        "",

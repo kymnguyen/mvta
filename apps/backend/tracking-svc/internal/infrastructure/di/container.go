@@ -64,26 +64,6 @@ func NewContainer(ctx context.Context, config config.Config, logger *zap.Logger)
 	commandBus := messaging.NewInMemoryCommandBus()
 
 	commandBus.Register(
-		"CreateVehicle",
-		service.NewCreateVehicleCommandHandler(vehicleRepo, outboxRepo),
-	)
-	commandBus.Register(
-		"UpdateVehicleLocation",
-		service.NewUpdateVehicleLocationCommandHandler(vehicleRepo, outboxRepo),
-	)
-	commandBus.Register(
-		"ChangeVehicleStatus",
-		service.NewChangeVehicleStatusCommandHandler(vehicleRepo, outboxRepo),
-	)
-	commandBus.Register(
-		"UpdateVehicleMileage",
-		service.NewUpdateVehicleMileageCommandHandler(vehicleRepo, outboxRepo),
-	)
-	commandBus.Register(
-		"UpdateVehicleFuelLevel",
-		service.NewUpdateVehicleFuelLevelCommandHandler(vehicleRepo, outboxRepo),
-	)
-	commandBus.Register(
 		"RecordVehicleChange",
 		service.NewRecordVehicleChangeCommandHandler(changeHistoryRepo),
 	)

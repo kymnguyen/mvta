@@ -25,16 +25,6 @@ func (h *VehicleFuelLevelUpdatedEventHandler) Handle(ctx context.Context, payloa
 		return err
 	}
 
-	cmd := &command.UpdateVehicleFuelLevelCommand{
-		VehicleID: evt.VehicleID,
-		FuelLevel: evt.FuelLevel,
-	}
-
-	if err := h.commandBus.Dispatch(ctx, cmd); err != nil {
-		h.logger.Error("failed to dispatch update vehicle fuel level command", zap.Error(err))
-		return err
-	}
-
 	changeCmd := &command.RecordVehicleChangeCommand{
 		VehicleID:  evt.VehicleID,
 		VIN:        "",

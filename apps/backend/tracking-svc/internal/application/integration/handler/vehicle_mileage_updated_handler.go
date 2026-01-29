@@ -25,16 +25,6 @@ func (h *VehicleMileageUpdatedEventHandler) Handle(ctx context.Context, payload 
 		return err
 	}
 
-	cmd := &command.UpdateVehicleMileageCommand{
-		VehicleID: evt.VehicleID,
-		Mileage:   evt.Mileage,
-	}
-
-	if err := h.commandBus.Dispatch(ctx, cmd); err != nil {
-		h.logger.Error("failed to dispatch update vehicle mileage command", zap.Error(err))
-		return err
-	}
-
 	changeCmd := &command.RecordVehicleChangeCommand{
 		VehicleID:  evt.VehicleID,
 		VIN:        "",

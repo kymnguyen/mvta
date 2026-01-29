@@ -22,13 +22,8 @@ func RegisterRoutes(
 
 	mux.HandleFunc("GET /health", healthCheck)
 
-	mux.HandleFunc("POST /api/v1/vehicles", h.CreateVehicle)
 	mux.HandleFunc("GET /api/v1/vehicles", h.GetAllVehicles)
 	mux.HandleFunc("GET /api/v1/vehicles/{id}", h.GetVehicle)
-	mux.HandleFunc("PATCH /api/v1/vehicles/{id}/location", h.UpdateLocation)
-	mux.HandleFunc("PATCH /api/v1/vehicles/{id}/status", h.ChangeStatus)
-	mux.HandleFunc("PATCH /api/v1/vehicles/{id}/mileage", h.UpdateMileage)
-	mux.HandleFunc("PATCH /api/v1/vehicles/{id}/fuel", h.UpdateFuelLevel)
 
 	adminMux := http.NewServeMux()
 	adminMux.HandleFunc("GET /api/v1/admin/vehicles", h.GetAllVehicles)

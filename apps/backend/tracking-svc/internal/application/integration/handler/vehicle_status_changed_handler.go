@@ -35,5 +35,24 @@ func (h *VehicleStatusChangedEventHandler) Handle(ctx context.Context, payload [
 		return err
 	}
 
+	// Record change history
+	changeCmd := &command.RecordVehicleChangeCommand{
+		VehicleID:  evt.VehicleID,
+		VIN:        "",
+		ChangeType: "status_changed",
+		OldValue: map[string]interface{}{
+			"status": evt.OldStatus,
+		},
+		NewValue: map[string]interface{}{
+			"status": evt.NewStatus,
+		},
+		Version: evt.Version,
+	}
+
+	if err := h.commandBus.Dispatch(ctx, changeCmd); err != nil {
+		h.logger.Error("failed to record vehicle change history", zap.Error(err))
+		// Don't return error - change history is non-critical
+	}
+
 	return nil
 }

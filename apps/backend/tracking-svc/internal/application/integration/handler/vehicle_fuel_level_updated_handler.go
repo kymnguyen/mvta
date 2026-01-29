@@ -35,5 +35,23 @@ func (h *VehicleFuelLevelUpdatedEventHandler) Handle(ctx context.Context, payloa
 		return err
 	}
 
+	// Record change history
+	changeCmd := &command.RecordVehicleChangeCommand{
+		VehicleID:  evt.VehicleID,
+		VIN:        "",
+		ChangeType: "fuel_updated",
+		OldValue:   map[string]interface{}{},
+		NewValue: map[string]interface{}{
+			"fuelLevel": evt.FuelLevel,
+			"isLow":     evt.IsLow,
+		},
+		Version: evt.Version,
+	}
+
+	if err := h.commandBus.Dispatch(ctx, changeCmd); err != nil {
+		h.logger.Error("failed to record vehicle change history", zap.Error(err))
+		// Don't return error - change history is non-critical
+	}
+
 	return nil
 }

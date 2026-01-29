@@ -48,5 +48,29 @@ func (h *VehicleCreatedEventHandler) Handle(ctx context.Context, payload []byte)
 		return err
 	}
 
+	// Record change history
+	changeCmd := &command.RecordVehicleChangeCommand{
+		VehicleID:  evt.VehicleID,
+		VIN:        evt.VIN,
+		ChangeType: "created",
+		OldValue:   map[string]interface{}{},
+		NewValue: map[string]interface{}{
+			"vin":          evt.VIN,
+			"vehicleName":  evt.VehicleName,
+			"vehicleModel": evt.VehicleModel,
+			"status":       evt.Status,
+			"latitude":     evt.Latitude,
+			"longitude":    evt.Longitude,
+			"mileage":      evt.Mileage,
+			"fuelLevel":    evt.FuelLevel,
+		},
+		Version: 1,
+	}
+
+	if err := h.commandBus.Dispatch(ctx, changeCmd); err != nil {
+		h.logger.Error("failed to record vehicle change history", zap.Error(err))
+		// Don't return error - change history is non-critical
+	}
+
 	return nil
 }

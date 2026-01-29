@@ -24,8 +24,9 @@ type Container struct {
 	MongoClient *mongo.Client
 	Logger      *zap.Logger
 
-	VehicleRepository repository.VehicleRepository
-	OutboxRepository  repository.OutboxRepository
+	VehicleRepository              repository.VehicleRepository
+	OutboxRepository               repository.OutboxRepository
+	VehicleChangeHistoryRepository repository.VehicleChangeHistoryRepository
 
 	CommandBus     command.CommandBus
 	QueryBus       query.QueryBus
@@ -57,6 +58,9 @@ func NewContainer(ctx context.Context, config config.Config, logger *zap.Logger)
 	outboxCollection := db.Collection("outbox")
 	outboxRepo := persistence.NewMongoOutboxRepository(outboxCollection)
 
+	vehicleChangeHistoryCollection := db.Collection("vehicle_change_history")
+	changeHistoryRepo := persistence.NewMongoVehicleChangeHistoryRepository(vehicleChangeHistoryCollection)
+
 	commandBus := messaging.NewInMemoryCommandBus()
 
 	commandBus.Register(
@@ -78,6 +82,10 @@ func NewContainer(ctx context.Context, config config.Config, logger *zap.Logger)
 	commandBus.Register(
 		"UpdateVehicleFuelLevel",
 		service.NewUpdateVehicleFuelLevelCommandHandler(vehicleRepo, outboxRepo),
+	)
+	commandBus.Register(
+		"RecordVehicleChange",
+		service.NewRecordVehicleChangeCommandHandler(changeHistoryRepo),
 	)
 
 	queryBus := messaging.NewInMemoryQueryBus()
@@ -113,6 +121,7 @@ func NewContainer(ctx context.Context, config config.Config, logger *zap.Logger)
 		Logger:                              logger,
 		VehicleRepository:                   vehicleRepo,
 		OutboxRepository:                    outboxRepo,
+		VehicleChangeHistoryRepository:      changeHistoryRepo,
 		CommandBus:                          commandBus,
 		QueryBus:                            queryBus,
 		EventPublisher:                      eventPublisher,

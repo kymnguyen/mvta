@@ -4,7 +4,6 @@ import (
 	"time"
 )
 
-// VehicleChangeHistory records a single change to a vehicle
 type VehicleChangeHistory struct {
 	ID         string                 `bson:"_id,omitempty"`
 	VehicleID  string                 `bson:"vehicleId"`
@@ -16,7 +15,6 @@ type VehicleChangeHistory struct {
 	Version    int64                  `bson:"version"` // Vehicle version at time of change
 }
 
-// NewVehicleChangeHistory creates a new change history record
 func NewVehicleChangeHistory(
 	vehicleID string,
 	vin string,

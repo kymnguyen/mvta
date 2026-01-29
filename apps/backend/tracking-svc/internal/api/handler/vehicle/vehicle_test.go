@@ -14,9 +14,9 @@ import (
 
 	"context"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/command"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/dto"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/query"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/command"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/dto"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/query"
 )
 
 // --- Mocks ---

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/command"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/query"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/command"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/query"
 )
 
 type InMemoryCommandBus struct {

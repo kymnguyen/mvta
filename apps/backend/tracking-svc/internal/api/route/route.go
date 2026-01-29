@@ -5,10 +5,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/handler/vehicle"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/middleware"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/command"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/query"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/api/handler/vehicle"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/api/middleware"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/command"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/query"
 )
 
 func RegisterRoutes(

@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/repository"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/repository"
 )
 
 type MongoOutboxRepository struct {

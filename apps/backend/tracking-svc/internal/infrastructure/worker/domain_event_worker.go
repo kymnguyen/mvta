@@ -10,8 +10,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/repository"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/resilience"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/repository"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/infrastructure/resilience"
 )
 
 var (

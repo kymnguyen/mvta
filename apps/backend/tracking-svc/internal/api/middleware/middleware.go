@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/resilience"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/security"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/infrastructure/resilience"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/infrastructure/security"
 )
 
 var (

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/dto"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/dto"
 )
 
 func RespondSuccess(w http.ResponseWriter, statusCode int, data interface{}) {

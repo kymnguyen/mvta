@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/event"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/valueobject"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/event"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/valueobject"
 )
 
 type Vehicle struct {

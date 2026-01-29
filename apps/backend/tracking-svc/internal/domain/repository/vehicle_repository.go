@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/entity"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/valueobject"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/entity"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/valueobject"
 )
 
 type VehicleRepository interface {

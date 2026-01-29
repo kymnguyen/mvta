@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/command"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/entity"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/repository"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/valueobject"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/command"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/entity"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/repository"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/valueobject"
 )
 
 type CreateVehicleCommandHandler struct {

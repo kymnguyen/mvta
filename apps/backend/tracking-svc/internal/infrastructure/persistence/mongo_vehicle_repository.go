@@ -9,8 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/entity"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/valueobject"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/entity"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/valueobject"
 )
 
 type MongoVehicleRepository struct {

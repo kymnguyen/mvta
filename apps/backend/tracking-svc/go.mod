@@ -1,4 +1,4 @@
-module github.com/kymnguyen/mvta/apps/backend/vehicle-svc
+module github.com/kymnguyen/mvta/apps/backend/tracking-svc
 
 go 1.25.6
 

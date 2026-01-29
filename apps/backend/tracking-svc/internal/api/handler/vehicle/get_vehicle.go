@@ -5,8 +5,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/handler"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/query"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/api/handler"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/query"
 )
 
 func (h *VehicleHandler) GetVehicle(w http.ResponseWriter, r *http.Request) {

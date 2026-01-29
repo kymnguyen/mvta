@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/integration/event"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/repository"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/integration/event"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/repository"
 	"go.uber.org/zap"
 )
 

@@ -12,12 +12,12 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/cmd/config"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/middleware"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/route"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/di"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/messaging"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/worker"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/cmd/config"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/api/middleware"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/api/route"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/infrastructure/di"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/infrastructure/messaging"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/infrastructure/worker"
 	"go.uber.org/zap"
 )
 
@@ -116,7 +116,7 @@ func initializeKafkaConsumer(container *di.Container, logger *zap.Logger) *messa
 		"vehicle.created",
 	}
 
-	consumer := messaging.NewKafkaConsumer(brokers, "vehicle-svc", topics, logger)
+	consumer := messaging.NewKafkaConsumer(brokers, "tracking-svc", topics, logger)
 
 	consumer.RegisterHandler("user.authorized",
 		container.UserAuthorizedEventHandler.Handle)

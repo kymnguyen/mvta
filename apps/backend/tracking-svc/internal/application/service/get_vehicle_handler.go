@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/dto"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/query"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/repository"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/valueobject"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/dto"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/query"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/repository"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/valueobject"
 )
 
 type GetVehicleQueryHandler struct {

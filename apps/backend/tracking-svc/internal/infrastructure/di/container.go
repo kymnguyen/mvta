@@ -10,13 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/command"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/integration/handler"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/query"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/service"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/repository"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/messaging"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/persistence"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/command"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/integration/handler"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/query"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/service"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/domain/repository"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/infrastructure/messaging"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/infrastructure/persistence"
 )
 
 type Container struct {

@@ -5,9 +5,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/handler"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/command"
-	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/dto"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/api/handler"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/command"
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/dto"
 )
 
 func (h *VehicleHandler) UpdateLocation(w http.ResponseWriter, r *http.Request) {

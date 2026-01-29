@@ -124,14 +124,14 @@ func initializeKafkaConsumer(container *di.Container, logger *zap.Logger) *messa
 
 	consumer.RegisterHandler("vehicle.created",
 		container.VehicleCreatedEventHandler.Handle)
-	consumer.RegisterHandler("vehicle.fuel.updated",
-		container.TrackingCorrectionEventHandler.Handle)
-	consumer.RegisterHandler("vehicle.status.changed",
-		container.TrackingAlertEventHandler.Handle)
-	consumer.RegisterHandler("vehicle.mileage.updated",
-		container.VehicleCreatedEventHandler.Handle)
 	consumer.RegisterHandler("vehicle.location.updated",
-		container.VehicleCreatedEventHandler.Handle)
+		container.VehicleLocationUpdatedEventHandler.Handle)
+	consumer.RegisterHandler("vehicle.status.changed",
+		container.VehicleStatusChangedEventHandler.Handle)
+	consumer.RegisterHandler("vehicle.mileage.updated",
+		container.VehicleMileageUpdatedEventHandler.Handle)
+	consumer.RegisterHandler("vehicle.fuel.updated",
+		container.VehicleFuelLevelUpdatedEventHandler.Handle)
 
 	return consumer
 }

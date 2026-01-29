@@ -32,9 +32,11 @@ type Container struct {
 	EventPublisher messaging.EventPublisher
 
 	// Event handlers for consuming external events
-	VehicleCreatedEventHandler     *handler.VehicleCreatedEventHandler
-	TrackingCorrectionEventHandler *handler.TrackingCorrectionEventHandler
-	TrackingAlertEventHandler      *handler.TrackingAlertEventHandler
+	VehicleCreatedEventHandler          *handler.VehicleCreatedEventHandler
+	VehicleLocationUpdatedEventHandler  *handler.VehicleLocationUpdatedEventHandler
+	VehicleStatusChangedEventHandler    *handler.VehicleStatusChangedEventHandler
+	VehicleMileageUpdatedEventHandler   *handler.VehicleMileageUpdatedEventHandler
+	VehicleFuelLevelUpdatedEventHandler *handler.VehicleFuelLevelUpdatedEventHandler
 }
 
 func NewContainer(ctx context.Context, config config.Config, logger *zap.Logger) (*Container, error) {
@@ -100,21 +102,25 @@ func NewContainer(ctx context.Context, config config.Config, logger *zap.Logger)
 		eventPublisher = &NoOpPublisher{logger: logger}
 	}
 
-	vehicleCreatedHandler := handler.NewVehicleCreatedEventHandler(logger)
-	trackingCorrectionHandler := handler.NewTrackingCorrectionEventHandler(vehicleRepo, logger)
-	trackingAlertHandler := handler.NewTrackingAlertEventHandler(logger)
+	vehicleCreatedHandler := handler.NewVehicleCreatedEventHandler(commandBus, logger)
+	vehicleLocationUpdatedHandler := handler.NewVehicleLocationUpdatedEventHandler(commandBus, logger)
+	vehicleStatusChangedHandler := handler.NewVehicleStatusChangedEventHandler(commandBus, logger)
+	vehicleMileageUpdatedHandler := handler.NewVehicleMileageUpdatedEventHandler(commandBus, logger)
+	vehicleFuelLevelUpdatedHandler := handler.NewVehicleFuelLevelUpdatedEventHandler(commandBus, logger)
 
 	return &Container{
-		MongoClient:                    mongoClient,
-		Logger:                         logger,
-		VehicleRepository:              vehicleRepo,
-		OutboxRepository:               outboxRepo,
-		CommandBus:                     commandBus,
-		QueryBus:                       queryBus,
-		EventPublisher:                 eventPublisher,
-		VehicleCreatedEventHandler:     vehicleCreatedHandler,
-		TrackingCorrectionEventHandler: trackingCorrectionHandler,
-		TrackingAlertEventHandler:      trackingAlertHandler,
+		MongoClient:                         mongoClient,
+		Logger:                              logger,
+		VehicleRepository:                   vehicleRepo,
+		OutboxRepository:                    outboxRepo,
+		CommandBus:                          commandBus,
+		QueryBus:                            queryBus,
+		EventPublisher:                      eventPublisher,
+		VehicleCreatedEventHandler:          vehicleCreatedHandler,
+		VehicleLocationUpdatedEventHandler:  vehicleLocationUpdatedHandler,
+		VehicleStatusChangedEventHandler:    vehicleStatusChangedHandler,
+		VehicleMileageUpdatedEventHandler:   vehicleMileageUpdatedHandler,
+		VehicleFuelLevelUpdatedEventHandler: vehicleFuelLevelUpdatedHandler,
 	}, nil
 }
 

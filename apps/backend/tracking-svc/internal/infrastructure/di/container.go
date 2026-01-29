@@ -78,6 +78,10 @@ func NewContainer(ctx context.Context, config config.Config, logger *zap.Logger)
 		"GetAllVehicles",
 		service.NewGetAllVehiclesQueryHandler(vehicleRepo),
 	)
+	queryBus.Register(
+		"GetVehicleChangeHistory",
+		service.NewGetVehicleChangeHistoryQueryHandler(changeHistoryRepo),
+	)
 
 	// Wire Kafka publisher
 	kafkaBrokers := strings.Split(os.Getenv("KAFKA_BROKERS"), ",")

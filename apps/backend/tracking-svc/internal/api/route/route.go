@@ -24,6 +24,7 @@ func RegisterRoutes(
 
 	mux.HandleFunc("GET /api/v1/vehicles", h.GetAllVehicles)
 	mux.HandleFunc("GET /api/v1/vehicles/{id}", h.GetVehicle)
+	mux.HandleFunc("GET /api/v1/vehicles/{id}/history", h.GetChangeHistory)
 
 	adminMux := http.NewServeMux()
 	adminMux.HandleFunc("GET /api/v1/admin/vehicles", h.GetAllVehicles)

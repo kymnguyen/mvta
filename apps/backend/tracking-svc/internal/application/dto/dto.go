@@ -103,3 +103,19 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 	Details string `json:"details,omitempty"`
 }
+
+type VehicleChangeHistoryResponse struct {
+	VehicleID string                `json:"vehicleId"`
+	Changes   []VehicleChangeRecord `json:"changes"`
+	Total     int                   `json:"total"`
+}
+
+type VehicleChangeRecord struct {
+	VehicleID  string                 `json:"vehicleId"`
+	VIN        string                 `json:"vin"`
+	ChangeType string                 `json:"changeType"`
+	OldValue   map[string]interface{} `json:"oldValue"`
+	NewValue   map[string]interface{} `json:"newValue"`
+	ChangedAt  string                 `json:"changedAt"`
+	Version    int64                  `json:"version"`
+}

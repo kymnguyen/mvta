@@ -84,14 +84,26 @@ func TestCreateVehicleCommandHandler_AlreadyExists(t *testing.T) {
 	h := NewCreateVehicleCommandHandler(vehicleRepo, outboxRepo)
 
 	cmd := &command.CreateVehicleCommand{
-		VIN: "VIN123",
+		VIN:           "VIN123",
+		VehicleName:   "TestCar",
+		VehicleModel:  "ModelX",
+		LicenseNumber: "ABC123",
+		Status:        "active",
+		Latitude:      1.23,
+		Longitude:     4.56,
+		Altitude:      7.89,
+		Mileage:       1000,
+		FuelLevel:     80,
 	}
-	vehicleRepo.On("ExistsByVIN", mock.Anything, "VIN123").Return(true, nil)
+
+	vehicleRepo.On("ExistsByVIN", mock.Anything, "VIN123").Return(false, nil)
+	vehicleRepo.On("Save", mock.Anything, mock.Anything).Return(errors.New("db error"))
 
 	err := h.Handle(context.Background(), cmd)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "already exists")
+	assert.Contains(t, err.Error(), "failed to save vehicle")
 	vehicleRepo.AssertExpectations(t)
+	outboxRepo.AssertNotCalled(t, "SaveOutboxEvent", mock.Anything, mock.Anything, mock.Anything)
 }
 
 func TestCreateVehicleCommandHandler_InvalidStatus(t *testing.T) {

@@ -9,22 +9,22 @@ import (
 	"go.uber.org/zap"
 )
 
-type UserAuthorizedEventHandler struct {
+type VehicleCreatedEventHandler struct {
 	logger *zap.Logger
 }
 
-func NewUserAuthorizedEventHandler(logger *zap.Logger) *UserAuthorizedEventHandler {
-	return &UserAuthorizedEventHandler{logger: logger}
+func NewVehicleCreatedEventHandler(logger *zap.Logger) *VehicleCreatedEventHandler {
+	return &VehicleCreatedEventHandler{logger: logger}
 }
 
-func (h *UserAuthorizedEventHandler) Handle(ctx context.Context, payload []byte) error {
-	var evt event.UserAuthorizedEvent
+func (h *VehicleCreatedEventHandler) Handle(ctx context.Context, payload []byte) error {
+	var evt event.VehicleCreatedEvent
 	if err := json.Unmarshal(payload, &evt); err != nil {
-		h.logger.Error("failed to unmarshal user authorized event", zap.Error(err))
+		h.logger.Error("failed to unmarshal vehicle created event", zap.Error(err))
 		return err
 	}
 
-	h.logger.Info("user authorized event received",
+	h.logger.Info("vehicle created event received",
 		zap.String("user_id", evt.UserID),
 		zap.String("role", evt.Role),
 	)

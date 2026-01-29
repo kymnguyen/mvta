@@ -35,7 +35,7 @@ func main() {
 	if mongoURI == "" {
 		appLogger.Fatal("ENV: MONGO_URI is required")
 	}
-	containerDI := initializeDIContainer(mongoURI, appLogger)
+	containerDI := initializeDIContainer(cfg, appLogger)
 
 	defer func() {
 		ctx, cancelBackground := context.WithTimeout(context.Background(), 10*time.Second)
@@ -47,22 +47,20 @@ func main() {
 
 	appLogger.Info("vehicle service started", zap.String("mongoURI", mongoURI))
 
-	// Initialize domain event worker (producer)
 	domainEventWorker := initializeWorker(containerDI, appLogger)
 	backgroundContext, cancelBackground := context.WithCancel(context.Background())
 	domainEventWorker.Start(backgroundContext)
 
-	// Initialize Kafka consumer for external events
-	// kafkaConsumer := initializeKafkaConsumer(containerDI, appLogger)
-	// if kafkaConsumer != nil {
-	// 	defer kafkaConsumer.Close()
-	// 	go func() {
-	// 		appLogger.Info("starting kafka consumer")
-	// 		if err := kafkaConsumer.Start(backgroundContext); err != nil {
-	// 			appLogger.Error("kafka consumer error", zap.Error(err))
-	// 		}
-	// 	}()
-	// }
+	kafkaConsumer := initializeKafkaConsumer(containerDI, appLogger, cfg)
+	if kafkaConsumer != nil {
+		defer kafkaConsumer.Close()
+		go func() {
+			appLogger.Info("starting kafka consumer")
+			if err := kafkaConsumer.Start(backgroundContext); err != nil {
+				appLogger.Error("kafka consumer error", zap.Error(err))
+			}
+		}()
+	}
 
 	mux := registerApiRoutes(containerDI, appLogger)
 	httpServer := startHTTPServer(cfg, middleware.LoggingMiddleware(mux))
@@ -89,6 +87,7 @@ func loadConfig() config.Config {
 	appPort := os.Getenv("APP_PORT")
 	mongoURI := os.Getenv("MONGO_URI")
 	mongoDb := os.Getenv("MONGO_DB")
+	brokers := os.Getenv("KAFKA_BROKERS")
 
 	return config.Config{
 		AppEnv: appEnv,
@@ -101,11 +100,12 @@ func loadConfig() config.Config {
 			URI:      mongoURI,
 			Database: mongoDb,
 		},
+		Kafka: config.KafkaConfig{Brokers: brokers},
 	}
 }
 
-func initializeKafkaConsumer(container *di.Container, logger *zap.Logger) *messaging.KafkaConsumer {
-	kafkaBrokers := os.Getenv("KAFKA_BROKERS")
+func initializeKafkaConsumer(container *di.Container, logger *zap.Logger, cfg config.Config) *messaging.KafkaConsumer {
+	kafkaBrokers := cfg.Kafka.Brokers
 	if kafkaBrokers == "" {
 		logger.Warn("KAFKA_BROKERS not configured, skipping kafka consumer")
 		return nil
@@ -120,12 +120,6 @@ func initializeKafkaConsumer(container *di.Container, logger *zap.Logger) *messa
 
 	consumer.RegisterHandler("user.authorized",
 		container.UserAuthorizedEventHandler.Handle)
-	consumer.RegisterHandler("tracking.correction.applied",
-		container.TrackingCorrectionEventHandler.Handle)
-	consumer.RegisterHandler("tracking.alert",
-		container.TrackingAlertEventHandler.Handle)
-	consumer.RegisterHandler("vehicle.created",
-		container.TrackingAlertEventHandler.Handle)
 
 	return consumer
 }
@@ -175,9 +169,9 @@ func initializeWorker(container *di.Container, logger *zap.Logger) *worker.Domai
 	return domainEventWorker
 }
 
-func initializeDIContainer(mongoURI string, logger *zap.Logger) *di.Container {
+func initializeDIContainer(config config.Config, logger *zap.Logger) *di.Container {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	container, err := di.NewContainer(ctx, mongoURI, logger)
+	container, err := di.NewContainer(ctx, config, logger)
 	cancel()
 	if err != nil {
 		logger.Fatal("failed to initialize container", zap.Error(err))

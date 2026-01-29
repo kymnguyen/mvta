@@ -35,7 +35,7 @@ func main() {
 	if mongoURI == "" {
 		appLogger.Fatal("ENV: MONGO_URI is required")
 	}
-	containerDI := initializeDIContainer(mongoURI, appLogger)
+	containerDI := initializeDIContainer(cfg, appLogger)
 
 	defer func() {
 		ctx, cancelBackground := context.WithTimeout(context.Background(), 10*time.Second)
@@ -53,16 +53,16 @@ func main() {
 	domainEventWorker.Start(backgroundContext)
 
 	// Initialize Kafka consumer for external events
-	// kafkaConsumer := initializeKafkaConsumer(containerDI, appLogger)
-	// if kafkaConsumer != nil {
-	// 	defer kafkaConsumer.Close()
-	// 	go func() {
-	// 		appLogger.Info("starting kafka consumer")
-	// 		if err := kafkaConsumer.Start(backgroundContext); err != nil {
-	// 			appLogger.Error("kafka consumer error", zap.Error(err))
-	// 		}
-	// 	}()
-	// }
+	kafkaConsumer := initializeKafkaConsumer(containerDI, appLogger)
+	if kafkaConsumer != nil {
+		defer kafkaConsumer.Close()
+		go func() {
+			appLogger.Info("starting kafka consumer")
+			if err := kafkaConsumer.Start(backgroundContext); err != nil {
+				appLogger.Error("kafka consumer error", zap.Error(err))
+			}
+		}()
+	}
 
 	mux := registerApiRoutes(containerDI, appLogger)
 	httpServer := startHTTPServer(cfg, middleware.LoggingMiddleware(mux))
@@ -114,18 +114,24 @@ func initializeKafkaConsumer(container *di.Container, logger *zap.Logger) *messa
 	brokers := strings.Split(kafkaBrokers, ",")
 	topics := []string{
 		"vehicle.created",
+		"vehicle.location.updated",
+		"vehicle.status.changed",
+		"vehicle.mileage.updated",
+		"vehicle.fuel.updated",
 	}
 
 	consumer := messaging.NewKafkaConsumer(brokers, "tracking-svc", topics, logger)
 
-	consumer.RegisterHandler("user.authorized",
-		container.UserAuthorizedEventHandler.Handle)
-	consumer.RegisterHandler("tracking.correction.applied",
-		container.TrackingCorrectionEventHandler.Handle)
-	consumer.RegisterHandler("tracking.alert",
-		container.TrackingAlertEventHandler.Handle)
 	consumer.RegisterHandler("vehicle.created",
+		container.VehicleCreatedEventHandler.Handle)
+	consumer.RegisterHandler("vehicle.fuel.updated",
+		container.TrackingCorrectionEventHandler.Handle)
+	consumer.RegisterHandler("vehicle.status.changed",
 		container.TrackingAlertEventHandler.Handle)
+	consumer.RegisterHandler("vehicle.mileage.updated",
+		container.VehicleCreatedEventHandler.Handle)
+	consumer.RegisterHandler("vehicle.location.updated",
+		container.VehicleCreatedEventHandler.Handle)
 
 	return consumer
 }
@@ -175,9 +181,9 @@ func initializeWorker(container *di.Container, logger *zap.Logger) *worker.Domai
 	return domainEventWorker
 }
 
-func initializeDIContainer(mongoURI string, logger *zap.Logger) *di.Container {
+func initializeDIContainer(config config.Config, logger *zap.Logger) *di.Container {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	container, err := di.NewContainer(ctx, mongoURI, logger)
+	container, err := di.NewContainer(ctx, config, logger)
 	cancel()
 	if err != nil {
 		logger.Fatal("failed to initialize container", zap.Error(err))

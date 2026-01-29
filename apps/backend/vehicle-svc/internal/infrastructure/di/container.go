@@ -3,13 +3,13 @@ package di
 import (
 	"context"
 	"log"
-	"os"
 	"strings"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
 
+	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/cmd/config"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/command"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/integration/handler"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/query"
@@ -31,13 +31,11 @@ type Container struct {
 	EventPublisher messaging.EventPublisher
 
 	// Event handlers for consuming external events
-	UserAuthorizedEventHandler     *handler.UserAuthorizedEventHandler
-	TrackingCorrectionEventHandler *handler.TrackingCorrectionEventHandler
-	TrackingAlertEventHandler      *handler.TrackingAlertEventHandler
+	UserAuthorizedEventHandler *handler.UserAuthorizedEventHandler
 }
 
-func NewContainer(ctx context.Context, mongoURI string, logger *zap.Logger) (*Container, error) {
-	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
+func NewContainer(ctx context.Context, config config.Config, logger *zap.Logger) (*Container, error) {
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(config.Mongo.URI))
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +44,7 @@ func NewContainer(ctx context.Context, mongoURI string, logger *zap.Logger) (*Co
 		return nil, err
 	}
 
-	db := mongoClient.Database("vehicle_db")
+	db := mongoClient.Database(config.Mongo.Database)
 
 	vehicleCollection := db.Collection("vehicles")
 	vehicleRepo := persistence.NewMongoVehicleRepository(vehicleCollection)
@@ -89,7 +87,7 @@ func NewContainer(ctx context.Context, mongoURI string, logger *zap.Logger) (*Co
 	)
 
 	// Wire Kafka publisher
-	kafkaBrokers := strings.Split(os.Getenv("KAFKA_BROKERS"), ",")
+	kafkaBrokers := strings.Split(config.Kafka.Brokers, ",")
 	var eventPublisher messaging.EventPublisher
 	if len(kafkaBrokers) > 0 && kafkaBrokers[0] != "" {
 		eventPublisher = messaging.NewKafkaPublisher(kafkaBrokers, logger)
@@ -101,20 +99,16 @@ func NewContainer(ctx context.Context, mongoURI string, logger *zap.Logger) (*Co
 
 	// Wire event handlers for consuming external events
 	userAuthHandler := handler.NewUserAuthorizedEventHandler(logger)
-	trackingCorrectionHandler := handler.NewTrackingCorrectionEventHandler(vehicleRepo, logger)
-	trackingAlertHandler := handler.NewTrackingAlertEventHandler(logger)
 
 	return &Container{
-		MongoClient:                    mongoClient,
-		Logger:                         logger,
-		VehicleRepository:              vehicleRepo,
-		OutboxRepository:               outboxRepo,
-		CommandBus:                     commandBus,
-		QueryBus:                       queryBus,
-		EventPublisher:                 eventPublisher,
-		UserAuthorizedEventHandler:     userAuthHandler,
-		TrackingCorrectionEventHandler: trackingCorrectionHandler,
-		TrackingAlertEventHandler:      trackingAlertHandler,
+		MongoClient:                mongoClient,
+		Logger:                     logger,
+		VehicleRepository:          vehicleRepo,
+		OutboxRepository:           outboxRepo,
+		CommandBus:                 commandBus,
+		QueryBus:                   queryBus,
+		EventPublisher:             eventPublisher,
+		UserAuthorizedEventHandler: userAuthHandler,
 	}, nil
 }
 

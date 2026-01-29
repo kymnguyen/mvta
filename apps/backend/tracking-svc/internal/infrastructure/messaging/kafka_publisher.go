@@ -18,11 +18,7 @@ type TopicConfig struct {
 
 func InitializeTopics(brokers []string, logger *zap.Logger) error {
 	topics := []TopicConfig{
-		{Name: "vehicle.created", NumPartitions: 3, ReplicationFactor: 1},
-		{Name: "vehicle.location.updated", NumPartitions: 3, ReplicationFactor: 1},
-		{Name: "vehicle.status.changed", NumPartitions: 3, ReplicationFactor: 1},
-		{Name: "vehicle.mileage.updated", NumPartitions: 3, ReplicationFactor: 1},
-		{Name: "vehicle.fuel.updated", NumPartitions: 3, ReplicationFactor: 1},
+		{Name: "tracking_config.created", NumPartitions: 3, ReplicationFactor: 1},
 	}
 
 	conn, err := kafka.Dial("tcp", brokers[0])

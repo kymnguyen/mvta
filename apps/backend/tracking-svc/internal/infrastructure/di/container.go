@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
 
+	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/cmd/config"
 	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/command"
 	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/integration/handler"
 	"github.com/kymnguyen/mvta/apps/backend/tracking-svc/internal/application/query"
@@ -31,13 +32,13 @@ type Container struct {
 	EventPublisher messaging.EventPublisher
 
 	// Event handlers for consuming external events
-	UserAuthorizedEventHandler     *handler.UserAuthorizedEventHandler
+	VehicleCreatedEventHandler     *handler.VehicleCreatedEventHandler
 	TrackingCorrectionEventHandler *handler.TrackingCorrectionEventHandler
 	TrackingAlertEventHandler      *handler.TrackingAlertEventHandler
 }
 
-func NewContainer(ctx context.Context, mongoURI string, logger *zap.Logger) (*Container, error) {
-	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
+func NewContainer(ctx context.Context, config config.Config, logger *zap.Logger) (*Container, error) {
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(config.Mongo.URI))
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +47,7 @@ func NewContainer(ctx context.Context, mongoURI string, logger *zap.Logger) (*Co
 		return nil, err
 	}
 
-	db := mongoClient.Database("vehicle_db")
+	db := mongoClient.Database(config.Mongo.Database)
 
 	vehicleCollection := db.Collection("vehicles")
 	vehicleRepo := persistence.NewMongoVehicleRepository(vehicleCollection)
@@ -99,8 +100,7 @@ func NewContainer(ctx context.Context, mongoURI string, logger *zap.Logger) (*Co
 		eventPublisher = &NoOpPublisher{logger: logger}
 	}
 
-	// Wire event handlers for consuming external events
-	userAuthHandler := handler.NewUserAuthorizedEventHandler(logger)
+	vehicleCreatedHandler := handler.NewVehicleCreatedEventHandler(logger)
 	trackingCorrectionHandler := handler.NewTrackingCorrectionEventHandler(vehicleRepo, logger)
 	trackingAlertHandler := handler.NewTrackingAlertEventHandler(logger)
 
@@ -112,7 +112,7 @@ func NewContainer(ctx context.Context, mongoURI string, logger *zap.Logger) (*Co
 		CommandBus:                     commandBus,
 		QueryBus:                       queryBus,
 		EventPublisher:                 eventPublisher,
-		UserAuthorizedEventHandler:     userAuthHandler,
+		VehicleCreatedEventHandler:     vehicleCreatedHandler,
 		TrackingCorrectionEventHandler: trackingCorrectionHandler,
 		TrackingAlertEventHandler:      trackingAlertHandler,
 	}, nil

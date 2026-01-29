@@ -6,6 +6,7 @@ type Config struct {
 	AppEnv string
 	HTTP   HTTPConfig
 	Mongo  MongoConfig
+	Kafka  KafkaConfig
 }
 
 type HTTPConfig struct {
@@ -17,4 +18,10 @@ type HTTPConfig struct {
 type MongoConfig struct {
 	URI      string
 	Database string
+}
+
+type KafkaConfig struct {
+	Host    string
+	Port    string
+	Brokers string
 }

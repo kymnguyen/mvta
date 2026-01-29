@@ -1,7 +1,19 @@
-FROM golang:1.22-alpine
-WORKDIR /app
-COPY go.mod go.sum ./
+FROM golang:1.25-alpine AS builder
+
+WORKDIR /build
+
+COPY go.work go.sum* ./
+COPY auth-svc ./auth-svc
+COPY vehicle-svc ./vehicle-svc
+COPY tracking-svc ./tracking-svc
+
+WORKDIR /build/auth-svc
+
 RUN go mod download
-COPY . .
-RUN go build -o server ./cmd
-CMD ["./server"]
+RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o /app/auth-svc ./cmd/main.go
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates tzdata
+COPY --from=builder /app/auth-svc /app/
+EXPOSE 50000
+CMD ["/app/auth-svc"]

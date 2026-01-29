@@ -1,22 +1,19 @@
-FROM golang:1.22-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
-WORKDIR /app
+WORKDIR /build
 
-COPY go.work go.work.sum* ./
-COPY tracking-svc/go.mod tracking-svc/go.sum ./tracking-svc/
+COPY go.work go.sum* ./
+COPY auth-svc ./auth-svc
+COPY vehicle-svc ./vehicle-svc
+COPY tracking-svc ./tracking-svc
 
-WORKDIR /app/tracking-svc
+WORKDIR /build/tracking-svc
+
 RUN go mod download
-
-COPY tracking-svc/ ./
-
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server ./cmd/main.go
+RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o /app/tracking-svc ./cmd/main.go
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates tzdata
-WORKDIR /root/
-
-COPY --from=builder /app/tracking-svc/server .
-
-EXPOSE 8002
-CMD ["./server"]
+COPY --from=builder /app/tracking-svc /app/
+EXPOSE 50002
+CMD ["/app/tracking-svc"]

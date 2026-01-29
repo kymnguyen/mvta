@@ -3,6 +3,8 @@ package di
 import (
 	"context"
 	"log"
+	"os"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -23,8 +25,9 @@ type Container struct {
 	VehicleRepository repository.VehicleRepository
 	OutboxRepository  repository.OutboxRepository
 
-	CommandBus command.CommandBus
-	QueryBus   query.QueryBus
+	CommandBus     command.CommandBus
+	QueryBus       query.QueryBus
+	EventPublisher messaging.EventPublisher
 }
 
 func NewContainer(ctx context.Context, mongoURI string, logger *zap.Logger) (*Container, error) {
@@ -79,6 +82,16 @@ func NewContainer(ctx context.Context, mongoURI string, logger *zap.Logger) (*Co
 		service.NewGetAllVehiclesQueryHandler(vehicleRepo),
 	)
 
+	// Wire Kafka publisher
+	kafkaBrokers := strings.Split(os.Getenv("KAFKA_BROKERS"), ",")
+	var eventPublisher messaging.EventPublisher
+	if len(kafkaBrokers) > 0 && kafkaBrokers[0] != "" {
+		eventPublisher = messaging.NewKafkaPublisher(kafkaBrokers, logger)
+	} else {
+		logger.Warn("KAFKA_BROKERS not configured, using no-op publisher")
+		eventPublisher = &NoOpPublisher{logger: logger}
+	}
+
 	return &Container{
 		MongoClient:       mongoClient,
 		Logger:            logger,
@@ -86,13 +99,31 @@ func NewContainer(ctx context.Context, mongoURI string, logger *zap.Logger) (*Co
 		OutboxRepository:  outboxRepo,
 		CommandBus:        commandBus,
 		QueryBus:          queryBus,
+		EventPublisher:    eventPublisher,
 	}, nil
 }
 
 func (c *Container) Close(ctx context.Context) error {
+	if err := c.EventPublisher.Close(); err != nil {
+		log.Printf("error closing event publisher: %v", err)
+	}
 	if err := c.MongoClient.Disconnect(ctx); err != nil {
 		log.Printf("error disconnecting mongodb: %v", err)
 		return err
 	}
+	return nil
+}
+
+// NoOpPublisher is a fallback when Kafka is not configured
+type NoOpPublisher struct {
+	logger *zap.Logger
+}
+
+func (p *NoOpPublisher) Publish(ctx context.Context, topic string, event interface{}) error {
+	p.logger.Debug("no-op publish", zap.String("topic", topic))
+	return nil
+}
+
+func (p *NoOpPublisher) Close() error {
 	return nil
 }

@@ -126,7 +126,7 @@ func initializeWorker(container *di.Container, logger *zap.Logger) *worker.Domai
 	const batchSize = 10
 	domainEventWorker := worker.NewDomainEventWorker(
 		container.OutboxRepository,
-		&noOpEventPublisher{logger: logger},
+		container.EventPublisher,
 		logger,
 		pollInterval,
 		batchSize,
@@ -153,13 +153,3 @@ func initializeLogger() *zap.Logger {
 	return logger
 }
 
-type noOpEventPublisher struct {
-	logger *zap.Logger
-}
-
-func (p *noOpEventPublisher) Publish(ctx context.Context, topic string, event interface{}) error {
-	p.logger.Debug("event published to topic",
-		zap.String("topic", topic),
-		zap.Any("event", event))
-	return nil
-}

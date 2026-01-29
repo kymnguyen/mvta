@@ -30,6 +30,7 @@ type DomainEventWorker struct {
 
 type EventPublisher interface {
 	Publish(ctx context.Context, topic string, event interface{}) error
+	Close() error
 }
 
 func NewDomainEventWorker(
@@ -55,6 +56,11 @@ func (w *DomainEventWorker) Start(ctx context.Context) {
 
 func (w *DomainEventWorker) Stop() {
 	close(w.done)
+}
+
+func (w *DomainEventWorker) Close() error {
+	w.Stop()
+	return w.eventPublisher.Close()
 }
 
 func (w *DomainEventWorker) pollLoop(ctx context.Context) {

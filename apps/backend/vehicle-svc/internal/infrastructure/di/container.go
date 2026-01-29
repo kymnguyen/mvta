@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/command"
+	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/integration/handler"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/query"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/application/service"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/domain/repository"
@@ -28,6 +29,11 @@ type Container struct {
 	CommandBus     command.CommandBus
 	QueryBus       query.QueryBus
 	EventPublisher messaging.EventPublisher
+
+	// Event handlers for consuming external events
+	UserAuthorizedEventHandler     *handler.UserAuthorizedEventHandler
+	TrackingCorrectionEventHandler *handler.TrackingCorrectionEventHandler
+	TrackingAlertEventHandler      *handler.TrackingAlertEventHandler
 }
 
 func NewContainer(ctx context.Context, mongoURI string, logger *zap.Logger) (*Container, error) {
@@ -87,19 +93,28 @@ func NewContainer(ctx context.Context, mongoURI string, logger *zap.Logger) (*Co
 	var eventPublisher messaging.EventPublisher
 	if len(kafkaBrokers) > 0 && kafkaBrokers[0] != "" {
 		eventPublisher = messaging.NewKafkaPublisher(kafkaBrokers, logger)
+		messaging.InitializeTopics(kafkaBrokers, logger)
 	} else {
 		logger.Warn("KAFKA_BROKERS not configured, using no-op publisher")
 		eventPublisher = &NoOpPublisher{logger: logger}
 	}
 
+	// Wire event handlers for consuming external events
+	userAuthHandler := handler.NewUserAuthorizedEventHandler(logger)
+	trackingCorrectionHandler := handler.NewTrackingCorrectionEventHandler(vehicleRepo, logger)
+	trackingAlertHandler := handler.NewTrackingAlertEventHandler(logger)
+
 	return &Container{
-		MongoClient:       mongoClient,
-		Logger:            logger,
-		VehicleRepository: vehicleRepo,
-		OutboxRepository:  outboxRepo,
-		CommandBus:        commandBus,
-		QueryBus:          queryBus,
-		EventPublisher:    eventPublisher,
+		MongoClient:                    mongoClient,
+		Logger:                         logger,
+		VehicleRepository:              vehicleRepo,
+		OutboxRepository:               outboxRepo,
+		CommandBus:                     commandBus,
+		QueryBus:                       queryBus,
+		EventPublisher:                 eventPublisher,
+		UserAuthorizedEventHandler:     userAuthHandler,
+		TrackingCorrectionEventHandler: trackingCorrectionHandler,
+		TrackingAlertEventHandler:      trackingAlertHandler,
 	}, nil
 }
 
@@ -114,7 +129,6 @@ func (c *Container) Close(ctx context.Context) error {
 	return nil
 }
 
-// NoOpPublisher is a fallback when Kafka is not configured
 type NoOpPublisher struct {
 	logger *zap.Logger
 }

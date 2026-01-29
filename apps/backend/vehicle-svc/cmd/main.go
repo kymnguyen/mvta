@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/middleware"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/route"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/di"
+	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/messaging"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/worker"
 	"go.uber.org/zap"
 )
@@ -45,9 +47,22 @@ func main() {
 
 	appLogger.Info("vehicle service started", zap.String("mongoURI", mongoURI))
 
+	// Initialize domain event worker (producer)
 	domainEventWorker := initializeWorker(containerDI, appLogger)
 	backgroundContext, cancelBackground := context.WithCancel(context.Background())
 	domainEventWorker.Start(backgroundContext)
+
+	// Initialize Kafka consumer for external events
+	// kafkaConsumer := initializeKafkaConsumer(containerDI, appLogger)
+	// if kafkaConsumer != nil {
+	// 	defer kafkaConsumer.Close()
+	// 	go func() {
+	// 		appLogger.Info("starting kafka consumer")
+	// 		if err := kafkaConsumer.Start(backgroundContext); err != nil {
+	// 			appLogger.Error("kafka consumer error", zap.Error(err))
+	// 		}
+	// 	}()
+	// }
 
 	mux := registerApiRoutes(containerDI, appLogger)
 	httpServer := startHTTPServer(cfg, middleware.LoggingMiddleware(mux))
@@ -87,6 +102,32 @@ func loadConfig() config.Config {
 			Database: mongoDb,
 		},
 	}
+}
+
+func initializeKafkaConsumer(container *di.Container, logger *zap.Logger) *messaging.KafkaConsumer {
+	kafkaBrokers := os.Getenv("KAFKA_BROKERS")
+	if kafkaBrokers == "" {
+		logger.Warn("KAFKA_BROKERS not configured, skipping kafka consumer")
+		return nil
+	}
+
+	brokers := strings.Split(kafkaBrokers, ",")
+	topics := []string{
+		"vehicle.created",
+	}
+
+	consumer := messaging.NewKafkaConsumer(brokers, "vehicle-svc", topics, logger)
+
+	consumer.RegisterHandler("user.authorized",
+		container.UserAuthorizedEventHandler.Handle)
+	consumer.RegisterHandler("tracking.correction.applied",
+		container.TrackingCorrectionEventHandler.Handle)
+	consumer.RegisterHandler("tracking.alert",
+		container.TrackingAlertEventHandler.Handle)
+	consumer.RegisterHandler("vehicle.created",
+		container.TrackingAlertEventHandler.Handle)
+
+	return consumer
 }
 
 func startHTTPServer(configuration config.Config, handler http.Handler) *http.Server {
@@ -152,4 +193,3 @@ func initializeLogger() *zap.Logger {
 	}
 	return logger
 }
-

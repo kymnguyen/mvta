@@ -1,7 +1,7 @@
 package command
 
 type RegisterUserCommand struct {
-	Username string
-	Password string
 	Email    string
+	Password string
+	Name     string
 }

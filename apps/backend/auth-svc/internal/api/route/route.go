@@ -20,6 +20,7 @@ func RegisterRoutes(
 	mux.HandleFunc("GET /health", healthCheck)
 	mux.HandleFunc("POST /api/v1/auth/login", authHandler.Login)
 	mux.HandleFunc("POST /api/v1/auth/register", authHandler.Register)
+	mux.HandleFunc("GET /api/v1/auth/verify", authHandler.Verify)
 }
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {

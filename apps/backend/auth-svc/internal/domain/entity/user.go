@@ -7,7 +7,6 @@ import (
 )
 
 const (
-
 	RoleAdmin    = "admin"
 	RoleOperator = "operator"
 	RoleViewer   = "viewer"
@@ -15,14 +14,15 @@ const (
 
 type User struct {
 	ID       string
-	Username string
+	Email    string
 	Password string
+	Name     string
 	Roles    []string
 }
 
-func NewUser(username, plainPassword string) (*User, error) {
-	if username == "" || plainPassword == "" {
-		return nil, fmt.Errorf("username and password are required")
+func NewUser(email, plainPassword, name string) (*User, error) {
+	if email == "" || plainPassword == "" {
+		return nil, fmt.Errorf("email and password are required")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
@@ -31,9 +31,10 @@ func NewUser(username, plainPassword string) (*User, error) {
 	}
 
 	return &User{
-		ID:       username,
-		Username: username,
+		ID:       email,
+		Email:    email,
 		Password: string(hashedPassword),
+		Name:     name,
 		Roles:    []string{RoleOperator},
 	}, nil
 }

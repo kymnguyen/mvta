@@ -18,9 +18,9 @@ func NewInMemoryUserRepository() *InMemoryUserRepository {
 		users: make(map[string]*entity.User),
 	}
 
-	adminUser, _ := entity.NewUser("admin", "admin123")
+	adminUser, _ := entity.NewUser("admin@ln.com", "admin123", "Admin User")
 	adminUser.SetRole(entity.RoleAdmin)
-	repo.users["admin"] = adminUser
+	repo.users["admin@ln.com"] = adminUser
 
 	return repo
 }
@@ -33,20 +33,28 @@ func (r *InMemoryUserRepository) Save(ctx context.Context, user *entity.User) er
 		return fmt.Errorf("user cannot be nil")
 	}
 
-	r.users[user.Username] = user
+	r.users[user.Email] = user
 	return nil
 }
 
-func (r *InMemoryUserRepository) GetByUsername(ctx context.Context, username string) (*entity.User, error) {
+func (r *InMemoryUserRepository) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	user, exists := r.users[username]
+	user, exists := r.users[email]
 	if !exists {
-		return nil, fmt.Errorf("user not found: %s", username)
+		return nil, fmt.Errorf("user not found: %s", email)
 	}
 
 	return user, nil
+}
+
+func (r *InMemoryUserRepository) ExistsByEmail(ctx context.Context, email string) (bool, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	_, exists := r.users[email]
+	return exists, nil
 }
 
 func (r *InMemoryUserRepository) ExistsByUsername(ctx context.Context, username string) (bool, error) {

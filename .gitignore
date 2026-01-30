@@ -1,2 +1,13 @@
 # Ignore Windows executables
 *.env
+node_modules/
+dist/
+.vscode/
+.DS_Store
+*.log
+.idea/
+*.iml
+out/
+coverage/
+build/
+*.tsbuildinfo

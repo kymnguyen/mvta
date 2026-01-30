@@ -29,12 +29,24 @@ func NewAuthHandler(
 }
 
 type LoginRequest struct {
-	Username string `json:"username"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
+type UserInfo struct {
+	ID    string `json:"id"`
+	Email string `json:"email"`
+	Name  string `json:"name"`
+	Role  string `json:"role"`
+}
+
 type LoginResponse struct {
-	Token string `json:"token"`
+	Token string   `json:"token"`
+	User  UserInfo `json:"user"`
+}
+
+type VerifyResponse struct {
+	User UserInfo `json:"user"`
 }
 
 type ErrorResponse struct {
@@ -55,23 +67,32 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	cmd := &command.LoginCommand{
-		Username: req.Username,
+		Email:    req.Email,
 		Password: req.Password,
 	}
 
-	token, err := h.loginHandler.Handle(r.Context(), cmd)
+	token, user, err := h.loginHandler.Handle(r.Context(), cmd)
 	if err != nil {
 		h.logger.Warn("login failed", zap.Error(err))
 		h.respondError(w, http.StatusUnauthorized, "invalid credentials")
 		return
 	}
 
-	h.respondSuccess(w, http.StatusOK, LoginResponse{Token: token})
+	h.respondSuccess(w, http.StatusOK, LoginResponse{
+		Token: token,
+		User: UserInfo{
+			ID:    user.ID,
+			Email: user.Email,
+			Name:  user.Name,
+			Role:  user.GetRole(),
+		},
+	})
 }
 
 type RegisterRequest struct {
-	Username string `json:"username"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
+	Name     string `json:"name"`
 }
 
 type RegisterResponse struct {
@@ -92,8 +113,9 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	cmd := &command.RegisterUserCommand{
-		Username: req.Username,
+		Email:    req.Email,
 		Password: req.Password,
+		Name:     req.Name,
 	}
 
 	if err := h.registerHandler.Handle(r.Context(), cmd); err != nil {
@@ -103,6 +125,24 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.respondSuccess(w, http.StatusCreated, RegisterResponse{Message: "user registered successfully"})
+}
+
+func (h *AuthHandler) Verify(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	// TODO: Extract user from JWT token in Authorization header
+	// For now, return a placeholder
+	h.respondSuccess(w, http.StatusOK, VerifyResponse{
+		User: UserInfo{
+			ID:    "user-id",
+			Email: "user@example.com",
+			Name:  "User",
+			Role:  "operator",
+		},
+	})
 }
 
 func (h *AuthHandler) respondSuccess(w http.ResponseWriter, statusCode int, data interface{}) {

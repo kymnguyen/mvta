@@ -10,8 +10,8 @@ import (
 
 type UserRepository interface {
 	Save(ctx context.Context, user *entity.User) error
-	GetByUsername(ctx context.Context, username string) (*entity.User, error)
-	ExistsByUsername(ctx context.Context, username string) (bool, error)
+	GetByEmail(ctx context.Context, email string) (*entity.User, error)
+	ExistsByEmail(ctx context.Context, email string) (bool, error)
 }
 
 type RegisterUserHandler struct {
@@ -23,15 +23,15 @@ func NewRegisterUserHandler(userRepo UserRepository) *RegisterUserHandler {
 }
 
 func (h *RegisterUserHandler) Handle(ctx context.Context, cmd *command.RegisterUserCommand) error {
-	exists, err := h.userRepo.ExistsByUsername(ctx, cmd.Username)
+	exists, err := h.userRepo.ExistsByEmail(ctx, cmd.Email)
 	if err != nil {
 		return fmt.Errorf("failed to check user existence: %w", err)
 	}
 	if exists {
-		return fmt.Errorf("user already exists: %s", cmd.Username)
+		return fmt.Errorf("user already exists: %s", cmd.Email)
 	}
 
-	user, err := entity.NewUser(cmd.Username, cmd.Password)
+	user, err := entity.NewUser(cmd.Email, cmd.Password, cmd.Name)
 	if err != nil {
 		return fmt.Errorf("failed to create user: %w", err)
 	}

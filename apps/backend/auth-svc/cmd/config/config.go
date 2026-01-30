@@ -12,7 +12,7 @@ type Config struct {
 
 func Load() *Config {
 	return &Config{
-		Port:      getEnv("PORT", "8082"),
+		Port:      getEnv("PORT", "50000"),
 		MongoURI:  getEnv("MONGO_URI", "mongodb://mongo:password@localhost:27017/auth_db?authSource=admin"),
 		JWTSecret: getEnv("JWT_SECRET", "supersecret"),
 	}

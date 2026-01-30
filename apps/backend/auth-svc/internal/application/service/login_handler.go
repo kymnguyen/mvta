@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/kymnguyen/mvta/apps/backend/auth-svc/internal/application/command"
+	"github.com/kymnguyen/mvta/apps/backend/auth-svc/internal/domain/entity"
 	"github.com/kymnguyen/mvta/apps/backend/auth-svc/internal/infrastructure/security"
 )
 
@@ -16,20 +17,20 @@ func NewLoginHandler(userRepo UserRepository) *LoginHandler {
 	return &LoginHandler{userRepo: userRepo}
 }
 
-func (h *LoginHandler) Handle(ctx context.Context, cmd *command.LoginCommand) (string, error) {
-	user, err := h.userRepo.GetByUsername(ctx, cmd.Username)
+func (h *LoginHandler) Handle(ctx context.Context, cmd *command.LoginCommand) (string, *entity.User, error) {
+	user, err := h.userRepo.GetByEmail(ctx, cmd.Email)
 	if err != nil {
-		return "", fmt.Errorf("user not found: %w", err)
+		return "", nil, fmt.Errorf("user not found: %w", err)
 	}
 
 	if !user.VerifyPassword(cmd.Password) {
-		return "", fmt.Errorf("invalid credentials")
+		return "", nil, fmt.Errorf("invalid credentials")
 	}
 
 	token, err := security.GenerateToken(user.ID, user.GetRole())
 	if err != nil {
-		return "", fmt.Errorf("failed to generate token: %w", err)
+		return "", nil, fmt.Errorf("failed to generate token: %w", err)
 	}
 
-	return token, nil
+	return token, user, nil
 }

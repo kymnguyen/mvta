@@ -1,11 +1,13 @@
 import axios from 'axios';
 
-const api = axios.create({
-  baseURL: '/api/v1',
+// API clients for different backend services
+const trackingApi = axios.create({
+  baseURL: '/api/tracking',
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
 
 export interface Vehicle {
   id: string;
@@ -41,12 +43,12 @@ export interface VehicleChangeHistoryResponse {
 
 export const vehicleApi = {
   getVehicles: async (): Promise<Vehicle[]> => {
-    const response = await api.get('/vehicles');
-    return response.data;
+    const response = await trackingApi.get('/vehicles');
+    return response.data.vehicles;
   },
 
   getVehicle: async (id: string): Promise<Vehicle> => {
-    const response = await api.get(`/vehicles/${id}`);
+    const response = await trackingApi.get(`/vehicles/${id}`);
     return response.data;
   },
 
@@ -55,11 +57,11 @@ export const vehicleApi = {
     limit = 50,
     offset = 0
   ): Promise<VehicleChangeHistoryResponse> => {
-    const response = await api.get(`/vehicles/${id}/history`, {
+    const response = await trackingApi.get(`/vehicles/${id}/history`, {
       params: { limit, offset },
     });
     return response.data;
   },
 };
 
-export default api;
+export default vehicleApi;

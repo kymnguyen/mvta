@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kymnguyen/mvta/apps/backend/auth-svc/cmd/config"
+	"github.com/kymnguyen/mvta/apps/backend/auth-svc/internal/api/middleware"
 	"github.com/kymnguyen/mvta/apps/backend/auth-svc/internal/api/route"
 	"github.com/kymnguyen/mvta/apps/backend/auth-svc/internal/infrastructure/di"
 )
@@ -32,7 +33,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,
-		Handler: mux,
+		Handler: middleware.CORSMiddleware(mux),
 	}
 
 	go func() {

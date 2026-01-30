@@ -6,6 +6,8 @@ export const MasterVehicleList: React.FC = () => {
   const queryClient = useQueryClient();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<VehicleSvc | null>(null);
+  const [editingMileage, setEditingMileage] = useState<VehicleSvc | null>(null);
+  const [editingFuel, setEditingFuel] = useState<VehicleSvc | null>(null);
 
   const { data: vehicles, isLoading, error } = useQuery({
     queryKey: ['vehicleSvc'],
@@ -34,6 +36,24 @@ export const MasterVehicleList: React.FC = () => {
       vehicleSvcApi.updateStatus(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicleSvc'] });
+    },
+  });
+
+  const updateMileageMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      vehicleSvcApi.updateMileage(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vehicleSvc'] });
+      setEditingMileage(null);
+    },
+  });
+
+  const updateFuelMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      vehicleSvcApi.updateFuel(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vehicleSvc'] });
+      setEditingFuel(null);
     },
   });
 
@@ -69,6 +89,24 @@ export const MasterVehicleList: React.FC = () => {
 
   const handleStatusChange = (id: string, status: string) => {
     updateStatusMutation.mutate({ id, data: { status } });
+  };
+
+  const handleUpdateMileage = (vehicle: VehicleSvc, e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      mileage: parseFloat(formData.get('mileage') as string),
+    };
+    updateMileageMutation.mutate({ id: vehicle.id, data });
+  };
+
+  const handleUpdateFuel = (vehicle: VehicleSvc, e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      fuelLevel: parseFloat(formData.get('fuelLevel') as string),
+    };
+    updateFuelMutation.mutate({ id: vehicle.id, data });
   };
 
   if (isLoading) return <div className="loading">Loading vehicles...</div>;
@@ -110,10 +148,10 @@ export const MasterVehicleList: React.FC = () => {
               <div className="form-group">
                 <label>Status *</label>
                 <select name="status" required>
-                  <option value="available">Available</option>
-                  <option value="in_use">In Use</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
                   <option value="maintenance">Maintenance</option>
-                  <option value="out_of_service">Out of Service</option>
+                  <option value="retired">Retired</option>
                 </select>
               </div>
               <div className="form-group">
@@ -181,10 +219,10 @@ export const MasterVehicleList: React.FC = () => {
                     onChange={(e) => handleStatusChange(vehicle.id, e.target.value)}
                     className={`status-select status-${vehicle.status}`}
                   >
-                    <option value="available">Available</option>
-                    <option value="in_use">In Use</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="out_of_service">Out of Service</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="maintenance">Maintenance</option>
+                      <option value="retired">Retired</option>
                   </select>
                 </td>
                 <td>
@@ -193,18 +231,107 @@ export const MasterVehicleList: React.FC = () => {
                 <td>{vehicle.mileage.toFixed(1)} km</td>
                 <td>{vehicle.fuelLevel.toFixed(1)}%</td>
                 <td>
-                  <button
-                    className="btn btn-small"
-                    onClick={() => setEditingVehicle(vehicle)}
-                  >
-                    Update Location
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <button
+                      className="btn btn-small"
+                      onClick={() => setEditingVehicle(vehicle)}
+                    >
+                      Location
+                    </button>
+                    <button
+                      className="btn btn-small"
+                      onClick={() => setEditingMileage(vehicle)}
+                    >
+                      Mileage
+                    </button>
+                    <button
+                      className="btn btn-small"
+                      onClick={() => setEditingFuel(vehicle)}
+                    >
+                      Fuel
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {editingMileage && (
+        <div className="modal-overlay" onClick={() => setEditingMileage(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Update Mileage - {editingMileage.vehicleName}</h2>
+            <form onSubmit={(e) => handleUpdateMileage(editingMileage, e)} className="vehicle-form">
+              <div className="form-group">
+                <label>Mileage (km) *</label>
+                <input
+                  type="number"
+                  step="any"
+                  name="mileage"
+                  defaultValue={editingMileage.mileage}
+                  required
+                  min="0"
+                />
+              </div>
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setEditingMileage(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={updateMileageMutation.isPending}
+                >
+                  {updateMileageMutation.isPending ? 'Updating...' : 'Update'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {editingFuel && (
+        <div className="modal-overlay" onClick={() => setEditingFuel(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Update Fuel Level - {editingFuel.vehicleName}</h2>
+            <form onSubmit={(e) => handleUpdateFuel(editingFuel, e)} className="vehicle-form">
+              <div className="form-group">
+                <label>Fuel Level (%) *</label>
+                <input
+                  type="number"
+                  step="any"
+                  name="fuelLevel"
+                  defaultValue={editingFuel.fuelLevel}
+                  required
+                  min="0"
+                  max="100"
+                />
+              </div>
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setEditingFuel(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={updateFuelMutation.isPending}
+                >
+                  {updateFuelMutation.isPending ? 'Updating...' : 'Update'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {editingVehicle && (
         <div className="modal-overlay" onClick={() => setEditingVehicle(null)}>

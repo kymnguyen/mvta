@@ -41,7 +41,7 @@ export interface VehicleChangeHistoryResponse {
   total: number;
 }
 
-export const vehicleApi = {
+export const trackingVehicleApi = {
   getVehicles: async (): Promise<Vehicle[]> => {
     const response = await trackingApi.get('/vehicles');
     return response.data.vehicles;
@@ -64,4 +64,4 @@ export const vehicleApi = {
   },
 };
 
-export default vehicleApi;
+export default trackingVehicleApi;

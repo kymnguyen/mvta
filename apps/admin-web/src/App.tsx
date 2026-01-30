@@ -4,8 +4,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './shared/hooks/useAuth';
 import { ProtectedRoute } from './shared/components/ProtectedRoute';
 import { Login } from './features/auth/Login';
-import { VehicleList } from './features/vehicles/VehicleList';
+import { TrackingVehicleList } from './features/vehicles/TrackingVehicleList';
 import { VehicleDetail } from './features/vehicles/VehicleDetail';
+import { MasterVehicleList } from './features/vehicles/MasterVehicleList';
 import { AppLayout } from './shared/components/AppLayout';
 import './App.css';
 
@@ -27,8 +28,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
-                <Route path="/" element={<VehicleList />} />
+                <Route path="/" element={<TrackingVehicleList />} />
                 <Route path="/vehicles/:id" element={<VehicleDetail />} />
+                <Route path="/vehicle-svc" element={<MasterVehicleList />} />
               </Route>
             </Route>
           </Routes>

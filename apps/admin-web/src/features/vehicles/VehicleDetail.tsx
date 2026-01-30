@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
-import { vehicleApi } from '../../shared/api/client';
+import { trackingVehicleApi } from '../../shared/api/tracking-svc';
 import { format } from 'date-fns';
 
 export const VehicleDetail: React.FC = () => {
@@ -9,13 +9,13 @@ export const VehicleDetail: React.FC = () => {
 
   const { data: vehicle, isLoading: vehicleLoading } = useQuery({
     queryKey: ['vehicle', id],
-    queryFn: () => vehicleApi.getVehicle(id!),
+    queryFn: () => trackingVehicleApi.getVehicle(id!),
     enabled: !!id,
   });
 
   const { data: history, isLoading: historyLoading } = useQuery({
     queryKey: ['vehicleHistory', id],
-    queryFn: () => vehicleApi.getVehicleHistory(id!),
+    queryFn: () => trackingVehicleApi.getVehicleHistory(id!),
     enabled: !!id,
   });
 

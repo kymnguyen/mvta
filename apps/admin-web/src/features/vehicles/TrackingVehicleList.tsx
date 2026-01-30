@@ -1,12 +1,12 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { vehicleApi, type Vehicle } from '../../shared/api/client';
+import { trackingVehicleApi, type Vehicle } from '../../shared/api/tracking-svc';
 import { Link } from 'react-router-dom';
 
-export const VehicleList: React.FC = () => {
+export const TrackingVehicleList: React.FC = () => {
   const { data: vehicles, isLoading, error } = useQuery({
     queryKey: ['vehicles'],
-    queryFn: vehicleApi.getVehicles,
+    queryFn: trackingVehicleApi.getVehicles,
   });
 
   if (isLoading) return <div className="loading">Loading vehicles...</div>;

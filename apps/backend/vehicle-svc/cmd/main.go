@@ -17,6 +17,7 @@ import (
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/api/route"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/di"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/messaging"
+	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/seed"
 	"github.com/kymnguyen/mvta/apps/backend/vehicle-svc/internal/infrastructure/worker"
 	"go.uber.org/zap"
 )
@@ -44,6 +45,9 @@ func main() {
 		}
 		cancelBackground()
 	}()
+
+	// Seed initial data
+	runSeeder(containerDI, appLogger)
 
 	appLogger.Info("vehicle service started", zap.String("mongoURI", mongoURI))
 
@@ -186,4 +190,14 @@ func initializeLogger() *zap.Logger {
 		os.Exit(1)
 	}
 	return logger
+}
+
+func runSeeder(container *di.Container, logger *zap.Logger) {
+	seeder := seed.NewSeeder(container.VehicleRepository, logger)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := seeder.SeedVehicles(ctx); err != nil {
+		logger.Error("failed to seed vehicles", zap.Error(err))
+	}
 }

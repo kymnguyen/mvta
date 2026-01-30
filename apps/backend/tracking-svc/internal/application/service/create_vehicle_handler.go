@@ -60,6 +60,7 @@ func (h *CreateVehicleCommandHandler) Handle(ctx context.Context, cmd command.Co
 
 	vehicle, err := entity.NewVehicle(
 		vehicleID,
+		command.RefID,
 		command.VIN,
 		command.VehicleName,
 		command.VehicleModel,

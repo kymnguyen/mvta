@@ -17,6 +17,7 @@ type CreateVehicleRequest struct {
 
 type CreateVehicleResponse struct {
 	ID            string    `json:"id"`
+	RefID         string    `json:"refId"`
 	VIN           string    `json:"vin"`
 	VehicleName   string    `json:"vehicleName"`
 	VehicleModel  string    `json:"vehicleModel"`
@@ -60,6 +61,7 @@ type ChangeVehicleStatusResponse struct {
 
 type VehicleResponse struct {
 	ID            string    `json:"id"`
+	RefID         string    `json:"refId"`
 	VIN           string    `json:"vin"`
 	VehicleName   string    `json:"vehicleName"`
 	VehicleModel  string    `json:"vehicleModel"`

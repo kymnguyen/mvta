@@ -36,6 +36,7 @@ func (h *GetVehicleQueryHandler) Handle(ctx context.Context, q query.Query) (que
 
 	return &dto.VehicleResponse{
 		ID:            vehicle.ID().String(),
+		RefID:         vehicle.RefID(),
 		VIN:           vehicle.VIN(),
 		VehicleName:   vehicle.VehicleName(),
 		VehicleModel:  vehicle.VehicleModel(),

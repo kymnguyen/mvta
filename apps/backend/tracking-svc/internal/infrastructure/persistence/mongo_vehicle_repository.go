@@ -23,6 +23,7 @@ func NewMongoVehicleRepository(collection *mongo.Collection) *MongoVehicleReposi
 
 type vehicleDocument struct {
 	ID            string  `bson:"_id"`
+	RefID         string  `bson:"refId"`
 	VIN           string  `bson:"vin"`
 	VehicleName   string  `bson:"vehicleName"`
 	VehicleModel  string  `bson:"vehicleModel"`
@@ -41,6 +42,7 @@ type vehicleDocument struct {
 func (r *MongoVehicleRepository) Save(ctx context.Context, vehicle *entity.Vehicle) error {
 	doc := vehicleDocument{
 		ID:            vehicle.ID().String(),
+		RefID:         vehicle.RefID(),
 		VIN:           vehicle.VIN(),
 		VehicleName:   vehicle.VehicleName(),
 		VehicleModel:  vehicle.VehicleModel(),
@@ -118,6 +120,7 @@ func (r *MongoVehicleRepository) FindByID(ctx context.Context, id valueobject.Ve
 
 	vehicle := entity.LoadFromHistory(
 		id,
+		doc.RefID,
 		doc.VIN,
 		doc.VehicleName,
 		doc.VehicleModel,
@@ -181,6 +184,7 @@ func (r *MongoVehicleRepository) FindAll(ctx context.Context, limit int, offset 
 
 		vehicle := entity.LoadFromHistory(
 			vehicleID,
+			vehDoc.RefID,
 			vehDoc.VIN,
 			vehDoc.VehicleName,
 			vehDoc.VehicleModel,

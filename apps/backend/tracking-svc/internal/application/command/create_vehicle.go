@@ -1,6 +1,7 @@
 package command
 
 type CreateVehicleCommand struct {
+	RefID         string
 	VIN           string
 	VehicleName   string
 	VehicleModel  string

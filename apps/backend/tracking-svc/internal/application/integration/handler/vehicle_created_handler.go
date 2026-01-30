@@ -31,6 +31,7 @@ func (h *VehicleCreatedEventHandler) Handle(ctx context.Context, payload []byte)
 	)
 
 	createCmd := &command.CreateVehicleCommand{
+		RefID:         evt.VehicleID,
 		VIN:           evt.VIN,
 		VehicleName:   evt.VehicleName,
 		VehicleModel:  evt.VehicleModel,

@@ -32,6 +32,7 @@ func (h *GetAllVehiclesQueryHandler) Handle(ctx context.Context, q query.Query) 
 	for _, vehicle := range vehicles {
 		responses = append(responses, &dto.VehicleResponse{
 			ID:            vehicle.ID().String(),
+			RefID:         vehicle.RefID(),
 			VIN:           vehicle.VIN(),
 			VehicleName:   vehicle.VehicleName(),
 			VehicleModel:  vehicle.VehicleModel(),

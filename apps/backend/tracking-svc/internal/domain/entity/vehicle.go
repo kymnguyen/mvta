@@ -10,6 +10,7 @@ import (
 
 type Vehicle struct {
 	id                valueobject.VehicleID
+	refId             string
 	vin               string
 	vehicleName       string
 	vehicleModel      string
@@ -26,6 +27,7 @@ type Vehicle struct {
 
 func NewVehicle(
 	id valueobject.VehicleID,
+	refId string,
 	vin string,
 	vehicleName string,
 	vehicleModel string,
@@ -48,6 +50,7 @@ func NewVehicle(
 	now := time.Now().UTC()
 	v := &Vehicle{
 		id:              id,
+		refId:           refId,
 		vin:             vin,
 		vehicleName:     vehicleName,
 		vehicleModel:    vehicleModel,
@@ -80,6 +83,10 @@ func NewVehicle(
 
 func (v *Vehicle) ID() valueobject.VehicleID {
 	return v.id
+}
+
+func (v *Vehicle) RefID() string {
+	return v.refId
 }
 
 func (v *Vehicle) VIN() string {
@@ -216,6 +223,7 @@ func (v *Vehicle) UncommittedEvents() []interface{} {
 
 func LoadFromHistory(
 	id valueobject.VehicleID,
+	refId string,
 	vin string,
 	vehicleName string,
 	vehicleModel string,
@@ -229,6 +237,7 @@ func LoadFromHistory(
 ) *Vehicle {
 	return &Vehicle{
 		id:              id,
+		refId:           refId,
 		vin:             vin,
 		vehicleName:     vehicleName,
 		vehicleModel:    vehicleModel,

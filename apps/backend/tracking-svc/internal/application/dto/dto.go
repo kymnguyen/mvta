@@ -113,6 +113,7 @@ type VehicleChangeHistoryResponse struct {
 }
 
 type VehicleChangeRecord struct {
+	ID         string                 `json:"id"`
 	VehicleID  string                 `json:"vehicleId"`
 	VIN        string                 `json:"vin"`
 	ChangeType string                 `json:"changeType"`

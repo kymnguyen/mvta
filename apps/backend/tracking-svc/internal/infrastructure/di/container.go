@@ -84,7 +84,7 @@ func NewContainer(ctx context.Context, config config.Config, logger *zap.Logger)
 	)
 	queryBus.Register(
 		"GetVehicleChangeHistory",
-		service.NewGetVehicleChangeHistoryQueryHandler(changeHistoryRepo),
+		service.NewGetVehicleChangeHistoryQueryHandler(changeHistoryRepo, vehicleRepo),
 	)
 
 	// Wire Kafka publisher

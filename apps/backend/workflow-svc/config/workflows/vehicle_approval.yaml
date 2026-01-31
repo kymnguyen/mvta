@@ -1,0 +1,73 @@
+name: vehicle_approval
+version: "1.0"
+description: Vehicle approval workflow for new vehicle registration
+
+states:
+  draft:
+    name: draft
+    type: initial
+    timeout: 72h
+    metadata:
+      description: Initial state for new vehicle entry
+
+  pending_approval:
+    name: pending_approval
+    type: intermediate
+    timeout: 48h
+    metadata:
+      description: Waiting for manager approval
+
+  approved:
+    name: approved
+    type: intermediate
+    metadata:
+      description: Approved by manager, pending activation
+
+  rejected:
+    name: rejected
+    type: terminal
+    metadata:
+      description: Rejected by manager
+
+  active:
+    name: active
+    type: terminal
+    metadata:
+      description: Vehicle active in fleet
+
+transitions:
+  - from: draft
+    to: pending_approval
+    action: submit_for_approval
+    metadata:
+      description: User submits vehicle for approval
+
+  - from: draft
+    to: rejected
+    event: timeout
+    metadata:
+      description: Auto-reject if not submitted within 72h
+
+  - from: pending_approval
+    to: approved
+    action: approve
+    metadata:
+      description: Manager approves vehicle
+
+  - from: pending_approval
+    to: rejected
+    action: reject
+    metadata:
+      description: Manager rejects vehicle
+
+  - from: pending_approval
+    to: rejected
+    event: timeout
+    metadata:
+      description: Auto-reject if no action within 48h
+
+  - from: approved
+    to: active
+    event: vehicle_activated
+    metadata:
+      description: System activates vehicle after final checks

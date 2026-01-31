@@ -18,7 +18,7 @@ This document provides the detailed technical design for the core workflow engin
 
 ```
                     ┌─────────────────────────────────────────────┐
-                    │              EXTERNAL ACTORS                 │
+                    │              EXTERNAL ACTORS                │
                     │  ┌─────────┐  ┌─────────┐  ┌─────────────┐  │
                     │  │ Admin   │  │ vehicle │  │ Kafka       │  │
                     │  │ UI /    │  │ -svc    │  │ Topics      │  │
@@ -29,7 +29,7 @@ This document provides the detailed technical design for the core workflow engin
                             │            │ (trigger)    │ (consume)
                             ▼            ▼              ▼
                     ┌─────────────────────────────────────────────┐
-                    │           WORKFLOW ENGINE                    │
+                    │           WORKFLOW ENGINE                   │
                     │  ┌──────────────────────────────────────┐   │
                     │  │  API  │  Engine  │  Repository       │   │
                     │  └──────────────────────────────────────┘   │
@@ -57,33 +57,33 @@ This design supports both; interfaces are implementation-agnostic.
 ### 3.1 Component Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │                              API LAYER                                       │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
-│  │ WorkflowHandler │  │ InstanceHandler │  │ ActionHandler               │  │
-│  │ - StartWorkflow │  │ - GetInstance   │  │ - ExecuteAction             │  │
-│  │                 │  │ - ListInstances │  │                             │  │
-│  └────────┬────────┘  └────────┬────────┘  └──────────────┬──────────────┘  │
+│  ┌─────────────────┐  ┌─────────────────┐   ┌─────────────────────────────┐  │
+│  │ WorkflowHandler │  │ InstanceHandler │   │ ActionHandler               │  │
+│  │ - StartWorkflow │  │ - GetInstance   │   │ - ExecuteAction             │  │
+│  │                 │  │ - ListInstances │   │                             │  │
+│  └────────┬────────┘  └────────┬────────┘   └──────────────┬──────────────┘  │
 └───────────┼────────────────────┼───────────────────────────┼─────────────────┘
             │                    │                           │
             ▼                    ▼                           ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         APPLICATION LAYER                                    │
+│                         APPLICATION LAYER                                   │
 │  ┌───────────────────────────────────────────────────────────────────────┐  │
-│  │                    WorkflowService (implements Engine)                  │  │
-│  │  - Start()  - ProcessEvent()  - ProcessAction()  - GetInstance()       │  │
+│  │                    WorkflowService (implements Engine)                │  │
+│  │  - Start()  - ProcessEvent()  - ProcessAction()  - GetInstance()      │  │
 │  └───────┬───────────────────────────────────────────────────────────────┘  │
-│          │ uses                                                              │
-│          ▼                                                                   │
-│  ┌───────────────────┐  ┌───────────────────┐  ┌─────────────────────────┐  │
-│  │ DefinitionRegistry│  │ TransitionValidator│  │ ActionHandler (optional)│  │
-│  │ - Get(name)       │  │ - CanTransition()  │  │ - OnTransition()        │  │
-│  └─────────┬─────────┘  └───────────────────┘  └────────────┬────────────┘  │
-└────────────┼─────────────────────────────────────────────────┼───────────────┘
+│          │ uses                                                             │
+│          ▼                                                                  │
+│  ┌───────────────────┐  ┌───────────────────┐   ┌─────────────────────────┐ │
+│  │ DefinitionRegistry│  │TransitionValidator│   │ ActionHandler (optional)│ │
+│  │ - Get(name)       │  │- CanTransition()  │   │ - OnTransition()        │ │
+│  └─────────┬─────────┘  └───────────────────┘   └────────────┬────────────┘ │
+└────────────┼─────────────────────────────────────────────────┼──────────────┘
              │                                                 │
              ▼                                                 │
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           DOMAIN LAYER                                       │
+│                           DOMAIN LAYER                                      │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
 │  │ WorkflowDef     │  │ WorkflowInstance│  │ Transition                  │  │
 │  │ State           │  │ StateTransition │  │ Event, Action               │  │
@@ -92,7 +92,7 @@ This design supports both; interfaces are implementation-agnostic.
              │                                                 │
              ▼                                                 ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                      INFRASTRUCTURE LAYER                                    │
+│                      INFRASTRUCTURE LAYER                                   │
 │  ┌───────────────────┐  ┌───────────────────┐  ┌─────────────────────────┐  │
 │  │ InstanceRepository│  │ YAMLDefinition    │  │ KafkaPublisher /        │  │
 │  │ (MongoDB)         │  │ Loader            │  │ NoOpPublisher           │  │
@@ -231,10 +231,10 @@ Client                API Handler         WorkflowService      Registry    Repos
    │                       │                      │───────────────>│            │
    │                       │                      │<───────────────│            │
    │                       │                      │  validate def  │            │
-   │                       │                      │  create instance (initial) │
+   │                       │                      │  create instance (initial)  │
    │                       │                      │  Save(instance)│            │
-   │                       │                      │───────────────────────────>│
-   │                       │                      │<───────────────────────────│
+   │                       │                      │────────────────────────────>│
+   │                       │                      │<────────────────────────────│
    │                       │<─────────────────────│                │            │
    │<──────────────────────│  201 + instance      │                │            │
 ```
@@ -257,15 +257,15 @@ Kafka Consumer       WorkflowService      Registry    Repository    ActionHandle
        │                     │  Get(workflowName)          │              │
        │                     │───────────────>│            │              │
        │                     │<───────────────│            │              │
-       │                     │  find transition(from, event)               │
+       │                     │  find transition(from, event)              │
        │                     │  validate      │            │              │
-       │                     │  update state, append history               │
-       │                     │  Update() (with version check)              │
+       │                     │  update state, append history              │
+       │                     │  Update() (with version check)             │
        │                     │────────────────────────────>│              │
        │                     │<────────────────────────────│              │
        │                     │  OnTransition()             │              │
-       │                     │────────────────────────────────────────────>│
-       │                     │<────────────────────────────────────────────│
+       │                     │───────────────────────────────────────────>│
+       │                     │<───────────────────────────────────────────│
        │<────────────────────│  success       │            │              │
 ```
 

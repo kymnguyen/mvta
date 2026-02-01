@@ -47,5 +47,15 @@
       "envFile": "${workspaceFolder}/apps/backend/tracking-svc/.env",
       "args": [ "-test.v"]
     },
+    {
+        "name": "wf-svc",
+        "type": "go",
+        "request": "launch",
+        "mode": "debug",
+        "program": "${workspaceFolder}/apps/backend/workflow-svc/cmd/main.go",
+        "cwd": "${workspaceFolder}/apps/backend/workflow-svc",
+        "envFile": "${workspaceFolder}/apps/backend/workflow-svc/.env",
+        "args": []
+    },
     ]
 }
